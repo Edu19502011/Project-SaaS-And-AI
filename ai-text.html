@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IA Texto - InsightAI</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="design.css">
+    
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        /* Custom scrollbar for sidebar */
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .sidebar-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 2px;
+        }
+        
+        /* Text generation interface */
+        .generation-interface {
+            min-height: 600px;
+        }
+        
+        /* Style cards */
+        .style-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .style-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2);
+        }
+        
+        .style-card.selected {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(59, 130, 246, 0.2));
+            border-color: #6366f1;
+        }
+        
+        /* Output area */
+        .output-area {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Typing indicator */
+        .typing-indicator {
+            animation: typing 1.5s infinite;
+        }
+        
+        @keyframes typing {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+        
+        /* Token counter */
+        .token-counter {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(59, 130, 246, 0.1));
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        /* AI Models grid */
+        .model-card {
+            transition: all 0.3s ease;
+        }
+        
+        .model-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+        }
+        
+        /* History items */
+        .history-item {
+            transition: all 0.3s ease;
+        }
+        
+        .history-item:hover {
+            background-color: rgba(99, 102, 241, 0.1);
+        }
+        
+        /* Code block styling */
+        .code-block {
+            background: #1e1e1e;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .code-header {
+            background: #2d2d30;
+            padding: 12px 16px;
+            border-bottom: 1px solid #3e3e42;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+        
+        .code-content {
+            padding: 16px;
+            overflow-x: auto;
+        }
+        
+        /* Loading animation */
+        .loading-dots {
+            display: inline-flex;
+            space-x: 2px;
+        }
+        
+        .loading-dots div {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #6366f1;
+            animation: loadingDots 1.4s infinite ease-in-out both;
+        }
+        
+        .loading-dots div:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dots div:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes loadingDots {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .generation-interface {
+                min-height: 500px;
+            }
+        }
+    </style>
+</head>
+<body class="grid-gradient-background text-white min-h-screen">
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
+    
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar-modern fixed inset-y-0 left-0 w-64 z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
+        <!-- Logo -->
+        <div class="flex items-center justify-center h-20 border-b border-slate-700">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-brain text-white text-lg"></i>
+                </div>
+                <span class="text-2xl font-bold gradient-text-primary">InsightAI</span>
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <nav class="mt-6 px-4 sidebar-scroll overflow-y-auto" style="height: calc(100vh - 140px);">
+            <div class="space-y-2">
+                <!-- Dashboard -->
+                <a href="dashboard.html" class="sidebar-hover flex items-center px-4 py-3 rounded-lg text-slate-300 hover:text-white transition-colors">
+                    <i class="fas fa-tachometer-alt mr-3 text-lg"></i>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+                
+                <!-- Reports -->
+                <a href="reports.html" class="sidebar-hover flex items-center px-4 py-3 rounded-lg text-slate-300 hover:text-white transition-colors">
+                    <i class="fas fa-chart-bar mr-3 text-lg"></i>
+                    <span class="font-medium">Relatórios</span>
+                </a>
+                
+                <!-- AI Text -->
+                <a href="ai-text.html" class="sidebar-hover flex items-center px-4 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+                    <i class="fas fa-magic mr-3 text-lg"></i>
+                    <span class="font-semibold">IA Texto</span>
+                </a>
+                
+                <!-- Data Analysis -->
+                <a href="data-analysis.html" class="sidebar-hover flex items-center px-4 py-3 rounded-lg text-slate-300 hover:text-white transition-colors">
+                    <i class="fas fa-brain mr-3 text-lg"></i>
+                    <span class="font-medium">Análise de Dados</span>
+                </a>
+                
+                <!-- Files -->
+                <a href="files.html" class="sidebar-hover flex items-center px-4 py-3 rounded-lg text-slate-300 hover:text-white transition-colors">
+                    <i class="fas fa-folder mr-3 text-lg"></i>
+                    <span class="font-medium">Arquivos</span>
+                </a>
+                
+                <!-- Settings -->
+                <a href="settings.html" class="sidebar-hover flex items-center px-4 py-3 rounded-lg text-slate-300 hover:text-white transition-colors">
+                    <i class="fas fa-cog mr-3 text-lg"></i>
+                    <span class="font-medium">Configurações</span>
+                </a>
+            </div>
+            
+            <!-- User Section -->
+            <div class="absolute bottom-4 left-4 right-4">
+                <div class="glass rounded-lg p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                            <span class="text-white font-semibold">JD</span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-white font-semibold text-sm">João Silva</div>
+                            <div class="text-slate-400 text-xs">Redator de Conteúdo</div>
+                        </div>
+                        <button onclick="showSettings()" class="text-slate-400 hover:text-white">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="lg:ml-64 min-h-screen">
+        <!-- Header -->
+        <header class="nav-modern sticky top-0 z-20 border-b border-slate-700">
+            <div class="px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <!-- Mobile Menu Button -->
+                    <button id="mobile-menu-btn" class="lg:hidden text-white">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    
+                    <!-- Page Title -->
+                    <div class="flex-1 lg:flex-none">
+                        <h1 class="text-2xl font-bold gradient-text-primary">IA Texto</h1>
+                    </div>
+                    
+                    <!-- Header Actions -->
+                    <div class="flex items-center space-x-4">
+                        <!-- Token Counter -->
+                        <div class="hidden md:flex token-counter rounded-lg px-3 py-2">
+                            <span class="text-purple-400 text-sm font-medium">
+                                <i class="fas fa-coins mr-1"></i>
+                                <span id="token-count">0</span> tokens
+                            </span>
+                        </div>
+                        
+                        <!-- Notifications -->
+                        <button class="relative p-2 text-slate-400 hover:text-white transition-colors">
+                            <i class="fas fa-bell text-lg"></i>
+                            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                        </button>
+                        
+                        <!-- User Menu -->
+                        <button class="flex items-center space-x-2 p-2 text-slate-400 hover:text-white transition-colors">
+                            <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                                <span class="text-white font-semibold text-sm">JD</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="p-4 sm:p-6 lg:p-8">
+            <!-- Welcome Section -->
+            <div class="mb-8 animate-fade-in">
+                <div class="glass rounded-2xl p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold mb-2">Gerador de Conteúdo com IA</h2>
+                            <p class="text-slate-300">Transforme suas ideias em textos profissionais com inteligência artificial avançada.</p>
+                        </div>
+                        <div class="hidden md:flex items-center space-x-4">
+                            <div class="text-center">
+                                <div class="text-2xl font-bold gradient-text">50+</div>
+                                <div class="text-slate-400 text-sm">Modelos de texto</div>
+                            </div>
+                            <div class="w-px h-12 bg-slate-600"></div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold gradient-text">2.1s</div>
+                                <div class="text-slate-400 text-sm">Tempo médio</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Interface -->
+            <div class="grid lg:grid-cols-3 gap-6 mb-8">
+                <!-- Input Section -->
+                <div class="lg:col-span-2 glass rounded-2xl p-6 animate-on-scroll">
+                    <!-- AI Models -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-4">Modelos de IA Disponíveis</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div class="model-card glass rounded-lg p-4 text-center border border-purple-500/30" data-model="gpt-4">
+                                <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-brain text-white"></i>
+                                </div>
+                                <div class="text-white font-semibold text-sm">GPT-4</div>
+                                <div class="text-slate-400 text-xs">Mais avançado</div>
+                            </div>
+                            
+                            <div class="model-card glass rounded-lg p-4 text-center border border-slate-600" data-model="claude">
+                                <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-green-500 rounded-lg flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-robot text-white"></i>
+                                </div>
+                                <div class="text-white font-semibold text-sm">Claude 3</div>
+                                <div class="text-slate-400 text-xs">Criativo</div>
+                            </div>
+                            
+                            <div class="model-card glass rounded-lg p-4 text-center border border-slate-600" data-model="gemini">
+                                <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-yellow-500 rounded-lg flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-star text-white"></i>
+                                </div>
+                                <div class="text-white font-semibold text-sm">Gemini</div>
+                                <div class="text-slate-400 text-xs">Versátil</div>
+                            </div>
+                            
+                            <div class="model-card glass rounded-lg p-4 text-center border border-slate-600" data-model="custom">
+                                <div class="w-12 h-12 bg-gradient-to-r from-yellow-500 to-red-500 rounded-lg flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-cog text-white"></i>
+                                </div>
+                                <div class="text-white font-semibold text-sm">Custom</div>
+                                <div class="text-slate-400 text-xs">Personalizado</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Text Input -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-slate-300 mb-3">
+                            O que você gostaria de criar?
+                        </label>
+                        <textarea 
+                            id="text-prompt" 
+                            placeholder="Descreva o que você gostaria que a IA criasse. Seja específico sobre o tema, tom, estilo e qualquer requisito especial..."
+                            class="w-full h-32 bg-slate-800/50 border border-slate-600 rounded-xl p-4 text-white placeholder-slate-400 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 resize-none"
+                        ></textarea>
+                        
+                        <!-- Quick Prompts -->
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <button onclick="insertQuickPrompt('blog')" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded-full transition-colors">
+                                Artigo de Blog
+                            </button>
+                            <button onclick="insertQuickPrompt('email')" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded-full transition-colors">
+                                Email Profissional
+                            </button>
+                            <button onclick="insertQuickPrompt('social')" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded-full transition-colors">
+                                Post Social
+                            </button>
+                            <button onclick="insertQuickPrompt('code')" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded-full transition-colors">
+                                Código
+                            </button>
+                            <button onclick="insertQuickPrompt('summary')" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded-full transition-colors">
+                                Resumo
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Writing Styles -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-slate-300 mb-3">
+                            Estilo de Escrita
+                        </label>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <div class="style-card selected border border-slate-600 rounded-lg p-4" data-style="professional">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-briefcase text-blue-400"></i>
+                                    <div>
+                                        <div class="font-semibold text-white text-sm">Profissional</div>
+                                        <div class="text-slate-400 text-xs">Formal e objetivo</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="style-card border border-slate-600 rounded-lg p-4" data-style="casual">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-smile text-green-400"></i>
+                                    <div>
+                                        <div class="font-semibold text-white text-sm">Casual</div>
+                                        <div class="text-slate-400 text-xs">Conversacional</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="style-card border border-slate-600 rounded-lg p-4" data-style="creative">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-palette text-purple-400"></i>
+                                    <div>
+                                        <div class="font-semibold text-white text-sm">Criativo</div>
+                                        <div class="text-slate-400 text-xs">Imaginativo</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="style-card border border-slate-600 rounded-lg p-4" data-style="technical">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-code text-yellow-400"></i>
+                                    <div>
+                                        <div class="font-semibold text-white text-sm">Técnico</div>
+                                        <div class="text-slate-400 text-xs">Especializado</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="style-card border border-slate-600 rounded-lg p-4" data-style="academic">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-graduation-cap text-indigo-400"></i>
+                                    <div>
+                                        <div class="font-semibold text-white text-sm">Acadêmico</div>
+                                        <div class="text-slate-400 text-xs">Científico</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="style-card border border-slate-600 rounded-lg p-4" data-style="persuasive">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-bullhorn text-red-400"></i>
+                                    <div>
+                                        <div class="font-semibold text-white text-sm">Persuasivo</div>
+                                        <div class="text-slate-400 text-xs">Convencimento</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Advanced Options -->
+                    <div class="mb-6">
+                        <button onclick="toggleAdvancedOptions()" class="flex items-center space-x-2 text-purple-400 hover:text-purple-300 font-medium">
+                            <i class="fas fa-cog"></i>
+                            <span>Opções Avançadas</span>
+                            <i class="fas fa-chevron-down transition-transform" id="advanced-icon"></i>
+                        </button>
+                        
+                        <div id="advanced-options" class="hidden mt-4 space-y-4">
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">Comprimento</label>
+                                    <select class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-white focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20">
+                                        <option>Curto (100-300 palavras)</option>
+                                        <option>Médio (300-800 palavras)</option>
+                                        <option>Longo (800+ palavras)</option>
+                                        <option>Personalizado</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">Tom</label>
+                                    <select class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-white focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20">
+                                        <option>Neutro</option>
+                                        <option>Otimista</option>
+                                        <option>Sério</option>
+                                        <option>Humorístico</option>
+                                        <option>Inspirador</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">Idioma</label>
+                                    <select class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-white focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20">
+                                        <option>Português (Brasil)</option>
+                                        <option>Português (Portugal)</option>
+                                        <option>Inglês (US)</option>
+                                        <option>Inglês (UK)</option>
+                                        <option>Espanhol</option>
+                                        <option>Francês</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">Nível de Criatividade</label>
+                                    <input type="range" min="0" max="100" value="70" class="w-full" id="creativity-slider">
+                                    <div class="flex justify-between text-xs text-slate-400 mt-1">
+                                        <span>Preciso</span>
+                                        <span id="creativity-value">70%</span>
+                                        <span>Criativo</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-2">Palavras-chave a incluir</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="Digite palavras-chave separadas por vírgula..."
+                                    class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Generate Button -->
+                    <button 
+                        onclick="generateText()" 
+                        id="generate-btn"
+                        class="w-full btn-primary py-4 rounded-xl font-bold text-lg btn-glow"
+                    >
+                        <i class="fas fa-magic mr-2"></i>
+                        Gerar Texto com IA
+                    </button>
+                </div>
+                
+                <!-- Output Section -->
+                <div class="glass rounded-2xl p-6 animate-on-scroll">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Resultado</h3>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="copyText()" class="text-blue-400 hover:text-blue-300 p-2">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button onclick="downloadText()" class="text-green-400 hover:text-green-300 p-2">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button onclick="shareText()" class="text-purple-400 hover:text-purple-300 p-2">
+                                <i class="fas fa-share"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Generated Text Output -->
+                    <div id="generated-output" class="output-area rounded-xl p-4 min-h-96">
+                        <div class="text-center text-slate-400 py-12">
+                            <i class="fas fa-magic text-4xl mb-4 text-purple-400"></i>
+                            <p>Seu texto gerado aparecerá aqui</p>
+                            <p class="text-sm mt-2">Digite seu prompt e clique em "Gerar Texto com IA"</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Generation Status -->
+                    <div id="generation-status" class="mt-4 text-center" style="display: none;">
+                        <div class="flex items-center justify-center space-x-2">
+                            <div class="loading-dots">
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                            </div>
+                            <span class="text-purple-400">IA está criando seu conteúdo...</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Text Actions -->
+                    <div id="text-actions" class="mt-4 flex flex-wrap gap-2" style="display: none;">
+                        <button onclick="improveText()" class="text-xs bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded-full transition-colors">
+                            <i class="fas fa-wand-magic-sparkles mr-1"></i>
+                            Melhorar
+                        </button>
+                        <button onclick="expandText()" class="text-xs bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-full transition-colors">
+                            <i class="fas fa-expand-arrows-alt mr-1"></i>
+                            Expandir
+                        </button>
+                        <button onclick="simplifyText()" class="text-xs bg-green-600 hover:bg-green-700 px-3 py-1 rounded-full transition-colors">
+                            <i class="fas fa-compress-arrows-alt mr-1"></i>
+                            Simplificar
+                        </button>
+                        <button onclick="translateText()" class="text-xs bg-yellow-600 hover:bg-yellow-700 px-3 py-1 rounded-full transition-colors">
+                            <i class="fas fa-language mr-1"></i>
+                            Traduzir
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- History Section -->
+            <div class="glass rounded-2xl p-6 animate-on-scroll">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold">Histórico de Gerações</h3>
+                    <button onclick="clearHistory()" class="text-red-400 hover:text-red-300 text-sm">
+                        <i class="fas fa-trash mr-1"></i>
+                        Limpar histórico
+                    </button>
+                </div>
+                
+                <div id="history-list" class="space-y-3">
+                    <!-- Sample history items -->
+                    <div class="history-item flex items-center justify-between p-4 bg-slate-800/30 rounded-lg">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-file-alt text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="text-white font-medium text-sm">Artigo sobre IA Generativa</div>
+                                <div class="text-slate-400 text-xs">Profissional • 850 palavras • Há 2 horas</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="loadFromHistory(1)" class="text-blue-400 hover:text-blue-300 p-2">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="deleteFromHistory(1)" class="text-red-400 hover:text-red-300 p-2">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="history-item flex items-center justify-between p-4 bg-slate-800/30 rounded-lg">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-green-500 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-envelope text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="text-white font-medium text-sm">Email de Follow-up</div>
+                                <div class="text-slate-400 text-xs">Profissional • 250 palavras • Há 5 horas</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="loadFromHistory(2)" class="text-blue-400 hover:text-blue-300 p-2">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="deleteFromHistory(2)" class="text-red-400 hover:text-red-300 p-2">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="history-item flex items-center justify-between p-4 bg-slate-800/30 rounded-lg">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-purple-500 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-hashtag text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="text-white font-medium text-sm">Post LinkedIn</div>
+                                <div class="text-slate-400 text-xs">Criativo • 180 palavras • Há 1 dia</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="loadFromHistory(3)" class="text-blue-400 hover:text-blue-300 p-2">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="deleteFromHistory(3)" class="text-red-400 hover:text-red-300 p-2">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="main.js"></script>
+    
+    <script>
+        // AI Text functionality
+        let selectedModel = 'gpt-4';
+        let selectedStyle = 'professional';
+        let generationHistory = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAIText();
+            setupMobileMenu();
+            setupModelSelection();
+            setupStyleSelection();
+            setupAdvancedOptions();
+        });
+        
+        function initializeAIText() {
+            // Initialize with default values
+            updateTokenCount();
+        }
+        
+        function setupMobileMenu() {
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            mobileMenuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
+            });
+            
+            overlay.addEventListener('click', () => {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            });
+        }
+        
+        function setupModelSelection() {
+            const modelCards = document.querySelectorAll('.model-card');
+            
+            modelCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    // Remove selection from all cards
+                    modelCards.forEach(c => {
+                        c.classList.remove('border-purple-500/30');
+                        c.classList.add('border-slate-600');
+                    });
+                    
+                    // Select clicked card
+                    card.classList.remove('border-slate-600');
+                    card.classList.add('border-purple-500/30');
+                    
+                    selectedModel = card.dataset.model;
+                });
+            });
+        }
+        
+        function setupStyleSelection() {
+            const styleCards = document.querySelectorAll('.style-card');
+            
+            styleCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    // Remove selection from all cards
+                    styleCards.forEach(c => c.classList.remove('selected'));
+                    
+                    // Select clicked card
+                    card.classList.add('selected');
+                    
+                    selectedStyle = card.dataset.style;
+                });
+            });
+        }
+        
+        function setupAdvancedOptions() {
+            const creativitySlider = document.getElementById('creativity-slider');
+            const creativityValue = document.getElementById('creativity-value');
+            
+            if (creativitySlider && creativityValue) {
+                creativitySlider.addEventListener('input', (e) => {
+                    creativityValue.textContent = e.target.value + '%';
+                });
+            }
+        }
+        
+        function toggleAdvancedOptions() {
+            const advancedOptions = document.getElementById('advanced-options');
+            const advancedIcon = document.getElementById('advanced-icon');
+            
+            if (advancedOptions.classList.contains('hidden')) {
+                advancedOptions.classList.remove('hidden');
+                advancedIcon.style.transform = 'rotate(180deg)';
+            } else {
+                advancedOptions.classList.add('hidden');
+                advancedIcon.style.transform = 'rotate(0deg)';
+            }
+        }
+        
+        function insertQuickPrompt(type) {
+            const promptTextarea = document.getElementById('text-prompt');
+            const prompts = {
+                blog: 'Escreva um artigo de blog sobre [tema] que seja informativo, envolvente e otimizado para SEO. Inclua um título cativante, introdução hook, subtítulos claros e conclusão com call-to-action.',
+                email: 'Redija um email profissional para [destinatário] sobre [assunto]. O tom deve ser [formal/informal], claro e objetivo, com saudação adequada e encerramento profissional.',
+                social: 'Crie um post para [rede social] sobre [tema]. Use uma linguagem envolvente, inclua hashtags relevantes, emojis apropriados e um call-to-action para aumentar o engajamento.',
+                code: 'Gere código em [linguagem] que [descrição da funcionalidade]. Inclua comentários explicativos, tratamento de erros e siga as melhores práticas da linguagem.',
+                summary: 'Resuma o seguinte texto em [número] palavras: [cole o texto aqui]. Mantenha os pontos principais, ideias centrais e conclusões importantes.'
+            };
+            
+            if (prompts[type]) {
+                promptTextarea.value = prompts[type];
+                updateTokenCount();
+            }
+        }
+        
+        function updateTokenCount() {
+            const promptTextarea = document.getElementById('text-prompt');
+            const tokenCount = document.getElementById('token-count');
+            
+            if (promptTextarea && tokenCount) {
+                // Simple token estimation (roughly 4 characters per token)
+                const text = promptTextarea.value;
+                const tokens = Math.ceil(text.length / 4);
+                tokenCount.textContent = tokens;
+            }
+        }
+        
+        async function generateText() {
+            const promptTextarea = document.getElementById('text-prompt');
+            const generateBtn = document.getElementById('generate-btn');
+            const outputDiv = document.getElementById('generated-output');
+            const statusDiv = document.getElementById('generation-status');
+            const actionsDiv = document.getElementById('text-actions');
+            
+            const prompt = promptTextarea.value.trim();
+            
+            if (!prompt) {
+                if (window.insightAI) {
+                    window.insightAI.showNotification('Por favor, insira um prompt!', 'warning');
+                }
+                return;
+            }
+            
+            // Show loading state
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Gerando...';
+            statusDiv.style.display = 'block';
+            actionsDiv.style.display = 'none';
+            
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            
+            // Generate mock text based on style
+            const generatedText = generateMockText(prompt, selectedStyle);
+            
+            // Display result
+            outputDiv.innerHTML = `
+                <div class="text-slate-200 leading-relaxed">
+                    ${generatedText}
+                </div>
+            `;
+            
+            // Hide status and show actions
+            statusDiv.style.display = 'none';
+            actionsDiv.style.display = 'flex';
+            
+            // Re-enable button
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = '<i class="fas fa-magic mr-2"></i>Gerar Texto com IA';
+            
+            // Add to history
+            addToHistory(prompt, generatedText);
+            
+            // Animate result
+            anime({
+                targets: outputDiv,
+                opacity: [0, 1],
+                translateY: [20, 0],
+                duration: 600,
+                easing: 'easeOutQuad'
+            });
+        }
+        
+        function generateMockText(prompt, style) {
+            const templates = {
+                professional: `
+                    <h3 class="text-xl font-bold mb-4 text-white">Análise Profissional do Contexto</h3>
+                    <p class="mb-4">A análise detalhada de "${prompt}" revela aspectos significativos que merecem atenção especial. A abordagem metodológica adotada permite uma compreensão abrangente dos elementos envolvidos.</p>
+                    
+                    <h4 class="text-lg font-semibold mb-3 text-purple-400">Principais Considerações</h4>
+                    <ul class="list-disc list-inside mb-4 space-y-2">
+                        <li>Avaliação criteriosa de todos os fatores relevantes</li>
+                        <li>Aplicação de metodologias comprovadas</li>
+                        <li>Análise de riscos e oportunidades</li>
+                        <li>Desenvolvimento de recomendações estratégicas</li>
+                    </ul>
+                    
+                    <p class="mb-4">Os resultados obtidos demonstram a importância de uma análise cuidadosa e embasada. As implicações práticas destacam a necessidade de ações estratégicas alinhadas com os objetivos estabelecidos.</p>
+                    
+                    <p class="text-slate-400 italic">Esta análise foi elaborada utilizando as melhores práticas do setor e metodologias reconhecidas internacionalmente.</p>
+                `,
+                
+                casual: `
+                    <h3 class="text-xl font-bold mb-4 text-white">E aí, vamos conversar sobre isso?</h3>
+                    <p class="mb-4">Cara, quando você mencionou "${prompt}", eu achei super interessante! É um tema que realmente merece mais atenção, sabe?</p>
+                    
+                    <p class="mb-4">Tipo, tem tantas possibilidades legais pra explorar aqui. Acho que a gente pode abordar isso de vários ângulos diferentes e criativos. O que você acha?</p>
+                    
+                    <p class="mb-4">Na minha opinião, o mais legal seria começar pelos pontos principais e depois desenvolver cada um deles. Assim fica mais fácil de acompanhar e entender.</p>
+                    
+                    <p class="text-slate-400">Enfim, é isso! Se quiser ajustar alguma coisa ou explorar mais algum aspecto, é só falar! 😊</p>
+                `,
+                
+                creative: `
+                    <h3 class="text-xl font-bold mb-4 text-white">Onde as Ideias Dançam com as Palavras</h3>
+                    <p class="mb-4">Em um mundo onde "${prompt}" se transforma em poesia viva, cada palavra dança ao ritmo da imaginação desenfreada. As possibilidades são infinitas, como estrelas no céu noturno da criatividade.</p>
+                    
+                    <p class="mb-4">A magia acontece quando pensamentos se entrelaçam, criando tapeçarias de significado que vão além do ordinário. Cada frase é uma pincelada de cor em um canvas infinito de expressão.</p>
+                    
+                    <blockquote class="border-l-4 border-purple-500 pl-4 my-6 italic text-purple-200">
+                        "Na dança entre o possível e o impossível, nascem as ideias que transformam o mundo."
+                    </blockquote>
+                    
+                    <p class="mb-4">Então vamos voar juntos nessa jornada de palavras e descobrir onde a imaginação pode nos levar. O céu não é o limite - é apenas o começo!</p>
+                `,
+                
+                technical: `
+                    <h3 class="text-xl font-bold mb-4 text-white">Especificações Técnicas e Análise de Implementação</h3>
+                    <p class="mb-4">Do ponto de vista técnico, "${prompt}" apresenta características complexas que requerem análise detalhada dos parâmetros envolvidos. A implementação deve considerar os seguintes aspectos:</p>
+                    
+                    <h4 class="text-lg font-semibold mb-3 text-blue-400">Requisitos Técnicos</h4>
+                    <ul class="list-disc list-inside mb-4 space-y-2">
+                        <li><strong>Arquitetura:</strong> Estrutura modular e escalável</li>
+                        <li><strong>Performance:</strong> Otimização para alta disponibilidade</li>
+                        <li><strong>Segurança:</strong> Implementação de camadas de proteção</li>
+                        <li><strong>Integração:</strong> Compatibilidade com sistemas existentes</li>
+                    </ul>
+                    
+                    <div class="code-block mb-4">
+                        <div class="code-header">
+                            <span class="text-white text-sm font-medium">Exemplo de Implementação</span>
+                            <button class="text-slate-400 hover:text-white text-sm">Copiar</button>
+                        </div>
+                        <div class="code-content">
+                            <pre><code class="language-javascript">// Configuração inicial
+const config = {
+    method: 'optimized',
+    parameters: {
+        timeout: 30000,
+        retries: 3,
+        cache: true
+    }
+};</code></pre>
+                        </div>
+                    </div>
+                    
+                    <p class="text-slate-400 italic">Esta implementação segue as melhores práticas da indústria e padrões estabelecidos.</p>
+                `,
+                
+                academic: `
+                    <h3 class="text-xl font-bold mb-4 text-white">Revisão da Literatura e Análise Crítica</h3>
+                    <p class="mb-4">A presente análise aborda "${prompt}" sob a perspectiva teórica e empírica, considerando as contribuições relevantes da literatura especializada. O estudo revela aspectos significativos que merecem atenção acadêmica.</p>
+                    
+                    <h4 class="text-lg font-semibold mb-3 text-indigo-400">Fundamentação Teórica</h4>
+                    <p class="mb-4">A base teórica deste trabalho fundamenta-se em pesquisas anteriores que demonstram a importância do tema em questão. Autores como Smith (2020) e Johnson (2021) já haviam sinalizado para a relevância desta abordagem.</p>
+                    
+                    <h4 class="text-lg font-semibold mb-3 text-indigo-400">Metodologia</h4>
+                    <p class="mb-4">A metodologia adotada segue os princípios da pesquisa quali-quantitativa, utilizando técnicas estabelecidas e validadas pela comunidade científica. A coleta de dados foi realizada de forma sistemática e rigorosa.</p>
+                    
+                    <h4 class="text-lg font-semibold mb-3 text-indigo-400">Resultados e Discussão</h4>
+                    <p class="mb-4">Os resultados obtidos corroboram as hipóteses iniciais e contribuem para o avanço do conhecimento na área. As implicações teóricas e práticas são discutidas à luz da literatura existente.</p>
+                    
+                    <p class="text-slate-400 italic">Este estudo representa uma contribuição significativa para o campo e sugere direções futuras para pesquisas subsequentes.</p>
+                `,
+                
+                persuasive: `
+                    <h3 class="text-xl font-bold mb-4 text-white">Descubra o Poder de Transformação que Está em Suas Mãos</h3>
+                    <p class="mb-4">Você já se imaginou dominando completamente "${prompt}"? Prepare-se, porque o que vou compartilhar com você vai revolucionar sua forma de pensar e agir.</p>
+                    
+                    <p class="mb-4">Imagine se eu te dissesse que existe uma maneira comprovada de alcançar resultados extraordinários, usando estratégias que poucos conhecem. E o melhor: você pode começar HOJE.</p>
+                    
+                    <div class="bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-lg p-6 my-6">
+                        <h4 class="text-lg font-semibold mb-3 text-purple-400">Por que isso funciona?</h4>
+                        <ul class="space-y-2">
+                            <li class="flex items-center"><i class="fas fa-check text-green-400 mr-2"></i>Resultados comprovados por milhares de pessoas</li>
+                            <li class="flex items-center"><i class="fas fa-check text-green-400 mr-2"></i>Método testado e aperfeiçoado ao longo dos anos</li>
+                            <li class="flex items-center"><i class="fas fa-check text-green-400 mr-2"></i>Garantia de satisfação ou seu dinheiro de volta</li>
+                        </ul>
+                    </div>
+                    
+                    <p class="mb-4">Não perca mais tempo! Cada minuto que você espera é um minuto que poderia estar usando para transformar sua vida. A decisão é sua, mas lembre-se: a oportunidade está batendo à sua porta AGORA.</p>
+                    
+                    <div class="text-center mt-6">
+                        <button class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-3 rounded-lg font-bold text-lg hover:from-purple-700 hover:to-blue-700 transition-all">
+                            Comece sua transformação hoje!
+                        </button>
+                    </div>
+                `
+            };
+            
+            return templates[style] || templates.professional;
+        }
+        
+        function copyText() {
+            const outputDiv = document.getElementById('generated-output');
+            const text = outputDiv.textContent;
+            
+            if (text.trim() && navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    if (window.insightAI) {
+                        window.insightAI.showNotification('Texto copiado para a área de transferência!', 'success');
+                    }
+                });
+            }
+        }
+        
+        function downloadText() {
+            const outputDiv = document.getElementById('generated-output');
+            const text = outputDiv.textContent;
+            
+            if (text.trim()) {
+                const blob = new Blob([text], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'texto-gerado.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                if (window.insightAI) {
+                    window.insightAI.showNotification('Texto baixado com sucesso!', 'success');
+                }
+            }
+        }
+        
+        function shareText() {
+            if (window.insightAI) {
+                window.insightAI.showNotification('Funcionalidade de compartilhamento em breve!', 'info');
+            }
+        }
+        
+        function improveText() {
+            if (window.insightAI) {
+                window.insightAI.showNotification('Melhorando texto...', 'info');
+            }
+        }
+        
+        function expandText() {
+            if (window.insightAI) {
+                window.insightAI.showNotification('Expandindo texto...', 'info');
+            }
+        }
+        
+        function simplifyText() {
+            if (window.insightAI) {
+                window.insightAI.showNotification('Simplificando texto...', 'info');
+            }
+        }
+        
+        function translateText() {
+            if (window.insightAI) {
+                window.insightAI.showNotification('Traduzindo texto...', 'info');
+            }
+        }
+        
+        function addToHistory(prompt, result) {
+            const historyItem = {
+                id: Date.now(),
+                prompt: prompt.substring(0, 50) + '...',
+                result: result,
+                style: selectedStyle,
+                timestamp: new Date().toLocaleString(),
+                wordCount: result.split(' ').length
+            };
+            
+            generationHistory.unshift(historyItem);
+            
+            // Keep only last 10 items
+            if (generationHistory.length > 10) {
+                generationHistory = generationHistory.slice(0, 10);
+            }
+            
+            updateHistoryDisplay();
+        }
+        
+        function updateHistoryDisplay() {
+            // This would update the history UI, but for now we'll keep the sample items
+        }
+        
+        function loadFromHistory(id) {
+            if (window.insightAI) {
+                window.insightAI.showNotification('Carregando do histórico...', 'info');
+            }
+        }
+        
+        function deleteFromHistory(id) {
+            if (window.insightAI) {
+                window.insightAI.showNotification('Item removido do histórico', 'success');
+            }
+        }
+        
+        function clearHistory() {
+            if (window.insightAI) {
+                window.insightAI.showNotification('Histórico limpo com sucesso!', 'success');
+            }
+        }
+        
+        function showSettings() {
+            if (window.insightAI) {
+                window.insightAI.showNotification('Configurações em breve!', 'info');
+            }
+        }
+        
+        // Update token count on input
+        document.addEventListener('DOMContentLoaded', function() {
+            const promptTextarea = document.getElementById('text-prompt');
+            if (promptTextarea) {
+                promptTextarea.addEventListener('input', updateTokenCount);
+            }
+        });
+    </script>
+</body>
+</html>

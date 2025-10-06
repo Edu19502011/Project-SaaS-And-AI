@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Dados - InsightAI</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/3.0.3/plotly.min.js"></script>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="design.css">
+    
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        /* Custom scrollbar for sidebar */
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .sidebar-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 2px;
+        }
+        
+        /* Analysis cards */
+        .analysis-card {
+            transition: all 0.3s ease;
+        }
+        
+        .analysis-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+        }
+        
+        /* Chart containers */
+        .chart-container {
+            position: relative;
+            height: 400px;
+        }
+        
+        .mini-chart-container {
+            position: relative;
+            height: 200px;
+        }
+        
+        /* Data upload area */
+        .upload-area {
+            border: 2px dashed rgba(99, 102, 241, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            border-color: rgba(99, 102, 241, 0.6);
+            background-color: rgba(99, 102, 241, 0.05);
+        }
+        
+        .upload-area.dragover {
+            border-color: #6366f1;
+            background-color: rgba(99, 102, 241, 0.1);
+        }
+        
+        /* Analysis options */
+        .analysis-option {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .analysis-option:hover {
+            background-color: rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+        
+        .analysis-option.selected {
+            background-color: rgba(99, 102, 241, 0.2);
+            border-color: #6366f1;
+        }
+        
+        /* Loading animation */
+        .loading-spinner {
+            border: 3px solid rgba(99, 102, 241, 0.3);
+            border-top: 3px solid #6366f1;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Results animation */
+        .result-fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="grid-gradient-background text-white min-h-screen">
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
+    
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar-modern fixed inset-y-0 left-0 w-64 z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
+        <!-- Logo -->
+        <div class="flex items-center justify-center h-20 border-b border-slate-700">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-brain text-white text-lg"></i>
+                </div>
+                <span class="text-2xl font-bold gradient-text-primary">InsightAI</span>
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <nav class="mt-6 px-4 sidebar-scroll overflow-y-auto" style="height: calc(100vh - 140px);">
+            <div class="space-y-2">
+                <!-- Dashboard -->
+                <a href="dashboard.html" class="sidebar-hover flex items-center px-4 py-3 rounded-lg text-slate-300 hover:text-white transition-colors">
+                    <i class="fas fa-tachometer-alt mr-3 text-lg"></i>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+                
+                <!-- Reports -->
+                <a href="reports.html" class="sidebar-hover flex items-center px-4 py-3 rounded-lg text-slate-300 hover:text-white transition-colors">
+                    <i class="fas fa-chart-bar mr-3 text-lg"></i>
+                    <span class="font-medium">Relatórios</span>
+                </a>
+                
+                <!-- AI Text -->
+                <a href="ai-text.html" class="sidebar-hover flex items-center px-4 py-3 rounded-lg text-slate-300 hover:text-white transition-colors">
+                    <i class="fas fa-magic mr-3 text-lg"></i>
+                    <span class="font-medium">IA Texto</span>
+                </a>
+                
+                <!-- Data Analysis -->
+                <a href="data-analysis.html" class="sidebar-hover flex items-center px-4 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+                    <i class="fas fa-brain mr-3 text-lg"></i>
+                    <span class="font-semibold">Análise de Dados</span>
+                </a>
+                
+                <!-- Files -->
+                <a href="files.html" class="sidebar-hover flex items-center px-4 py-3 rounded-lg text-slate-300 hover:text-white transition-colors">
+                    <i class="fas fa-folder mr-3 text-lg"></i>
+                    <span class="font-medium">Arquivos</span>
+                </a>
+                
+                <!-- Settings -->
+                <a href="settings.html" class="sidebar-hover flex items-center px-4 py-3 rounded-lg text-slate-300 hover:text-white transition-colors">
+                    <i class="fas fa-cog mr-3 text-lg"></i>
+                    <span class="font-medium">Configurações</span>
+                </a>
+            </div>
+            
+            <!-- User Section -->
+            <div class="absolute bottom-4 left-4 right-4">
+                <div class="glass rounded-lg p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                            <span class="text-white font-semibold">JD</span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-white font-semibold text-sm">João Silva</div>
+                            <div class="text-slate-400 text-xs">Cientista de Dados</div>
+                        </div>
+                        <button onclick="showSettings()" class="text-slate-400 hover:text-white">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="lg:ml-64 min-h-screen">
+        <!-- Header -->
+        <header class="nav-modern sticky top-0 z-20 border-b border-slate-700">
+            <div class="px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <!-- Mobile Menu Button -->
+                    <button id="mobile-menu-btn" class="lg:hidden text-white">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    
+                    <!-- Page Title -->
+                    <div class="flex-1 lg:flex-none">
+                        <h1 class="text-2xl font-bold gradient-text-primary">Análise de Dados</h1>
+                    </div>
+                    
+                    <!-- Header Actions -->
+                    <div class="flex items-center space-x-4">
+                        <!-- Export Button -->
+                        <button onclick="exportAnalysis()" class="hidden md:flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all">
+                            <i class="fas fa-download"></i>
+                            <span>Exportar</span>
+                        </button>
+                        
+                        <!-- Notifications -->
+                        <button class="relative p-2 text-slate-400 hover:text-white transition-colors">
+                            <i class="fas fa-bell text-lg"></i>
+                            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                        </button>
+                        
+                        <!-- User Menu -->
+                        <button class="flex items-center space-x-2 p-2 text-slate-400 hover:text-white transition-colors">
+                            <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                                <span class="text-white font-semibold text-sm">JD</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="p-4 sm:p-6 lg:p-8">
+            <!-- Welcome Section -->
+            <div class="mb-8 animate-fade-in">
+                <div class="glass rounded-2xl p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold mb-2">Análise Avançada de Dados</h2>
+                            <p class="text-slate-300">Use nossa IA para extrair insights poderosos dos seus dados.</p>
+                        </div>
+                        <div class="hidden md:flex items-center space-x-4">
+                            <div class="text-center">
+                                <div class="text-2xl font-bold gradient-text">15</div>
+                                <div class="text-slate-400 text-sm">Modelos disponíveis</div>
+                            </div>
+                            <div class="w-px h-12 bg-slate-600"></div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold gradient-text">2.3s</div>
+                                <div class="text-slate-400 text-sm">Tempo médio</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Data Upload Section -->
+            <div class="grid lg:grid-cols-3 gap-6 mb-8">
+                <!-- Upload Area -->
+                <div class="lg:col-span-2 glass rounded-2xl p-6 animate-on-scroll">
+                    <h3 class="text-xl font-bold mb-6">Importar Dados</h3>
+                    
+                    <!-- Upload Zone -->
+                    <div id="upload-area" class="upload-area rounded-xl p-8 text-center mb-6">
+                        <div class="mb-4">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-purple-400"></i>
+                        </div>
+                        <h4 class="text-lg font-semibold mb-2">Arraste seus arquivos aqui</h4>
+                        <p class="text-slate-400 mb-4">Ou clique para selecionar arquivos</p>
+                        <button onclick="document.getElementById('file-input').click()" class="btn-primary px-6 py-3 rounded-lg font-semibold">
+                            <i class="fas fa-folder-open mr-2"></i>
+                            Selecionar Arquivos
+                        </button>
+                        <input type="file" id="file-input" multiple accept=".csv,.xlsx,.json,.txt" class="hidden">
+                        <p class="text-slate-500 text-sm mt-4">Suporta: CSV, Excel, JSON, TXT (Max 50MB)</p>
+                    </div>
+                    
+                    <!-- Sample Data Button -->
+                    <div class="text-center">
+                        <button onclick="loadSampleData()" class="text-blue-400 hover:text-blue-300 font-medium">
+                            <i class="fas fa-database mr-2"></i>
+                            Usar dados de exemplo
+                        </button>
+                    </div>
+                    
+                    <!-- Uploaded Files -->
+                    <div id="uploaded-files" class="mt-6 space-y-3" style="display: none;">
+                        <h4 class="font-semibold text-slate-300">Arquivos carregados:</h4>
+                        <div id="file-list" class="space-y-2"></div>
+                    </div>
+                </div>
+                
+                <!-- Analysis Options -->
+                <div class="glass rounded-2xl p-6 animate-on-scroll">
+                    <h3 class="text-xl font-bold mb-6">Tipo de Análise</h3>
+                    
+                    <div class="space-y-3">
+                        <div class="analysis-option selected border border-slate-600 rounded-lg p-4" data-type="predictive">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-chart-line text-white"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-semibold text-white">Preditiva</div>
+                                    <div class="text-slate-400 text-sm">Prever tendências futuras</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-option border border-slate-600 rounded-lg p-4" data-type="descriptive">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-green-500 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-info-circle text-white"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-semibold text-white">Descritiva</div>
+                                    <div class="text-slate-400 text-sm">Resumir características dos dados</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-option border border-slate-600 rounded-lg p-4" data-type="diagnostic">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-yellow-500 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-search text-white"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-semibold text-white">Diagnóstica</div>
+                                    <div class="text-slate-400 text-sm">Identificar causas de problemas</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-option border border-slate-600 rounded-lg p-4" data-type="prescriptive">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-gradient-to-r from-yellow-500 to-red-500 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-lightbulb text-white"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-semibold text-white">Prescritiva</div>
+                                    <div class="text-slate-400 text-sm">Sugerir ações ótimas</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Analysis Settings -->
+                    <div class="mt-6 pt-6 border-t border-slate-700">
+                        <h4 class="font-semibold text-slate-300 mb-4">Configurações</h4>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-2">Modelo de IA</label>
+                                <select class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-white focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20">
+                                    <option>GPT-4 Turbo</option>
+                                    <option>Claude 3 Opus</option>
+                                    <option>Gemini Pro</option>
+                                    <option>Custom Model</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-2">Confiança mínima (%)</label>
+                                <input type="range" min="70" max="99" value="85" class="w-full" id="confidence-slider">
+                                <div class="flex justify-between text-xs text-slate-400 mt-1">
+                                    <span>70%</span>
+                                    <span id="confidence-value">85%</span>
+                                    <span>99%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Analyze Button -->
+                    <button 
+                        onclick="startAnalysis()" 
+                        id="analyze-btn"
+                        class="w-full btn-primary py-3 rounded-lg font-bold text-lg mt-6"
+                    >
+                        <i class="fas fa-play mr-2"></i>
+                        Iniciar Análise
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Analysis Results -->
+            <div id="analysis-results" class="glass rounded-2xl p-6 animate-on-scroll" style="display: none;">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold">Resultados da Análise</h3>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                        <span class="text-green-400 text-sm font-medium">IA Processando</span>
+                    </div>
+                </div>
+                
+                <!-- Loading State -->
+                <div id="analysis-loading" class="text-center py-12">
+                    <div class="loading-spinner mx-auto mb-4"></div>
+                    <p class="text-slate-300">Analisando seus dados com IA...</p>
+                    <p class="text-slate-500 text-sm mt-2">Isso pode levar alguns segundos</p>
+                </div>
+                
+                <!-- Results Content -->
+                <div id="analysis-content" class="space-y-8" style="display: none;">
+                    <!-- Summary Cards -->
+                    <div class="grid md:grid-cols-4 gap-4">
+                        <div class="glass rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold gradient-text" id="total-records">0</div>
+                            <div class="text-slate-400 text-sm">Registros</div>
+                        </div>
+                        <div class="glass rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold gradient-text" id="accuracy-score">0%</div>
+                            <div class="text-slate-400 text-sm">Precisão</div>
+                        </div>
+                        <div class="glass rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold gradient-text" id="processing-time">0s</div>
+                            <div class="text-slate-400 text-sm">Tempo</div>
+                        </div>
+                        <div class="glass rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold gradient-text" id="insights-found">0</div>
+                            <div class="text-slate-400 text-sm">Insights</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts Section -->
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div class="glass rounded-xl p-6">
+                            <h4 class="text-lg font-semibold mb-4">Distribuição dos Dados</h4>
+                            <div class="chart-container">
+                                <canvas id="distribution-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="glass rounded-xl p-6">
+                            <h4 class="text-lg font-semibold mb-4">Tendências</h4>
+                            <div class="chart-container">
+                                <canvas id="trends-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Insights Section -->
+                    <div class="glass rounded-xl p-6">
+                        <h4 class="text-lg font-semibold mb-4">Insights Gerados</h4>
+                        <div id="insights-list" class="space-y-4"></div>
+                    </div>
+                    
+                    <!-- Recommendations Section -->
+                    <div class="glass rounded-xl p-6">
+                        <h4 class="text-lg font-semibold mb-4">Recomendações</h4>
+                        <div id="recommendations-list" class="space-y-4"></div>
+                    </div>
+                    
+                    <!-- Export Options -->
+                    <div class="flex justify-center space-x-4">
+                        <button onclick="exportResults('pdf')" class="btn-secondary px-6 py-3 rounded-lg font-semibold">
+                            <i class="fas fa-file-pdf mr-2"></i>
+                            Exportar PDF
+                        </button>
+                        <button onclick="exportResults('excel')" class="btn-secondary px-6 py-3 rounded-lg font-semibold">
+                            <i class="fas fa-file-excel mr-2"></i>
+                            Exportar Excel
+                        </button>
+                        <button onclick="exportResults('json')" class="btn-secondary px-6 py-3 rounded-lg font-semibold">
+                            <i class="fas fa-code mr-2"></i>
+                            Exportar JSON
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="main.js"></script>
+    
+    <script>
+        // Data Analysis functionality
+        let selectedAnalysisType = 'predictive';
+        let uploadedFiles = [];
+        let sampleData = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDataAnalysis();
+            setupMobileMenu();
+            setupFileUpload();
+            setupAnalysisOptions();
+            setupConfidenceSlider();
+        });
+        
+        function initializeDataAnalysis() {
+            // Initialize with sample data
+            loadSampleData();
+        }
+        
+        function setupMobileMenu() {
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            mobileMenuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
+            });
+            
+            overlay.addEventListener('click', () => {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            });
+        }
+        
+        function setupFileUpload() {
+            const uploadArea = document.getElementById('upload-area');
+            const fileInput = document.getElementById('file-input');
+            
+            // Drag and drop functionality
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                handleFiles(e.dataTransfer.files);
+            });
+            
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+            });
+        }
+        
+        function handleFiles(files) {
+            uploadedFiles = Array.from(files);
+            displayUploadedFiles();
+        }
+        
+        function displayUploadedFiles() {
+            const uploadedFilesDiv = document.getElementById('uploaded-files');
+            const fileList = document.getElementById('file-list');
+            
+            if (uploadedFiles.length > 0) {
+                uploadedFilesDiv.style.display = 'block';
+                fileList.innerHTML = uploadedFiles.map(file => `
+                    <div class="flex items-center justify-between bg-slate-800/50 rounded-lg p-3">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-file-alt text-purple-400"></i>
+                            <span class="text-white">${file.name}</span>
+                            <span class="text-slate-400 text-sm">(${(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                        </div>
+                        <button onclick="removeFile('${file.name}')" class="text-red-400 hover:text-red-300">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        function removeFile(fileName) {
+            uploadedFiles = uploadedFiles.filter(file => file.name !== fileName);
+            if (uploadedFiles.length === 0) {
+                document.getElementById('uploaded-files').style.display = 'none';
+            } else {
+                displayUploadedFiles();
+            }
+        }
+        
+        function loadSampleData() {
+            // Generate sample data for demonstration
+            sampleData = {
+                records: 15420,
+                accuracy: 87,
+                processingTime: 3.2,
+                insights: 12,
+                distribution: {
+                    labels: ['Categoria A', 'Categoria B', 'Categoria C', 'Categoria D'],
+                    data: [35, 28, 22, 15]
+                },
+                trends: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mai', 'Jun'],
+                    data: [65, 72, 78, 85, 92, 88]
+                }
+            };
+            
+            // Show notification
+            if (window.insightAI) {
+                window.insightAI.showNotification('Dados de exemplo carregados com sucesso!', 'success');
+            }
+        }
+        
+        function setupAnalysisOptions() {
+            const options = document.querySelectorAll('.analysis-option');
+            
+            options.forEach(option => {
+                option.addEventListener('click', () => {
+                    // Remove selected class from all options
+                    options.forEach(opt => opt.classList.remove('selected'));
+                    
+                    // Add selected class to clicked option
+                    option.classList.add('selected');
+                    
+                    // Update selected analysis type
+                    selectedAnalysisType = option.dataset.type;
+                });
+            });
+        }
+        
+        function setupConfidenceSlider() {
+            const slider = document.getElementById('confidence-slider');
+            const valueDisplay = document.getElementById('confidence-value');
+            
+            slider.addEventListener('input', (e) => {
+                valueDisplay.textContent = e.target.value + '%';
+            });
+        }
+        
+        async function startAnalysis() {
+            const analyzeBtn = document.getElementById('analyze-btn');
+            const resultsDiv = document.getElementById('analysis-results');
+            const loadingDiv = document.getElementById('analysis-loading');
+            const contentDiv = document.getElementById('analysis-content');
+            
+            // Check if data is available
+            if (uploadedFiles.length === 0 && !sampleData) {
+                if (window.insightAI) {
+                    window.insightAI.showNotification('Por favor, carregue dados ou use os dados de exemplo!', 'warning');
+                }
+                return;
+            }
+            
+            // Show results section
+            resultsDiv.style.display = 'block';
+            loadingDiv.style.display = 'block';
+            contentDiv.style.display = 'none';
+            
+            // Disable analyze button
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Analisando...';
+            
+            // Simulate analysis process
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            
+            // Hide loading and show content
+            loadingDiv.style.display = 'none';
+            contentDiv.style.display = 'block';
+            
+            // Populate results
+            populateAnalysisResults();
+            
+            // Re-enable analyze button
+            analyzeBtn.disabled = false;
+            analyzeBtn.innerHTML = '<i class="fas fa-play mr-2"></i>Iniciar Análise';
+            
+            // Animate results
+            anime({
+                targets: '#analysis-content > *',
+                opacity: [0, 1],
+                translateY: [20, 0],
+                duration: 600,
+                delay: anime.stagger(100),
+                easing: 'easeOutQuad'
+            });
+        }
+        
+        function populateAnalysisResults() {
+            const data = sampleData || {
+                records: 5000,
+                accuracy: 85,
+                processingTime: 2.5,
+                insights: 8
+            };
+            
+            // Update summary cards
+            document.getElementById('total-records').textContent = data.records.toLocaleString();
+            document.getElementById('accuracy-score').textContent = data.accuracy + '%';
+            document.getElementById('processing-time').textContent = data.processingTime + 's';
+            document.getElementById('insights-found').textContent = data.insights;
+            
+            // Initialize charts
+            initializeDistributionChart(data.distribution);
+            initializeTrendsChart(data.trends);
+            
+            // Generate insights and recommendations
+            generateInsights();
+            generateRecommendations();
+        }
+        
+        function initializeDistributionChart(distribution) {
+            const ctx = document.getElementById('distribution-chart');
+            if (ctx && typeof Chart !== 'undefined') {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: distribution.labels,
+                        data: distribution.data,
+                        datasets: [{
+                            data: distribution.data,
+                            backgroundColor: ['#6366f1', '#3b82f6', '#10b981', '#f59e0b'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#cbd5e1',
+                                borderColor: '#475569',
+                                borderWidth: 1
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#334155' }
+                            },
+                            y: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#334155' }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        function initializeTrendsChart(trends) {
+            const ctx = document.getElementById('trends-chart');
+            if (ctx && typeof Chart !== 'undefined') {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: trends.labels,
+                        datasets: [{
+                            label: 'Tendência',
+                            data: trends.data,
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#cbd5e1',
+                                borderColor: '#475569',
+                                borderWidth: 1
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#334155' }
+                            },
+                            y: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#334155' }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        function generateInsights() {
+            const insights = [
+                {
+                    icon: 'fas fa-chart-line',
+                    color: 'text-green-400',
+                    title: 'Crescimento consistente identificado',
+                    description: 'Os dados mostram uma tendência de crescimento estável nos últimos 6 meses, com aumento médio de 12% ao mês.'
+                },
+                {
+                    icon: 'fas fa-exclamation-triangle',
+                    color: 'text-yellow-400',
+                    title: 'Sazonalidade detectada',
+                    description: 'Foram identificados padrões sazonais significativos que afetam os resultados em períodos específicos do ano.'
+                },
+                {
+                    icon: 'fas fa-users',
+                    color: 'text-blue-400',
+                    title: 'Segmentação de usuários',
+                    description: 'É possível identificar 4 segmentos distintos de usuários com comportamentos e preferências diferentes.'
+                },
+                {
+                    icon: 'fas fa-lightbulb',
+                    color: 'text-purple-400',
+                    title: 'Oportunidade de otimização',
+                    description: 'Existe uma oportunidade de melhoria de 23% na eficiência através da otimização de processos identificados.'
+                }
+            ];
+            
+            const insightsList = document.getElementById('insights-list');
+            insightsList.innerHTML = insights.map(insight => `
+                <div class="flex items-start space-x-4 p-4 bg-slate-800/30 rounded-lg">
+                    <div class="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="${insight.icon} ${insight.color}"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h5 class="font-semibold text-white mb-1">${insight.title}</h5>
+                        <p class="text-slate-300 text-sm">${insight.description}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function generateRecommendations() {
+            const recommendations = [
+                {
+                    priority: 'high',
+                    title: 'Implementar modelo preditivo avançado',
+                    description: 'Desenvolver um modelo de machine learning mais sofisticado para melhorar a precisão das previsões em 15%.',
+                    impact: 'Alto impacto',
+                    effort: 'Esforço médio'
+                },
+                {
+                    priority: 'medium',
+                    title: 'Otimizar processamento de dados',
+                    description: 'Revisar e otimizar o pipeline de processamento de dados para reduzir o tempo de análise em 30%.',
+                    impact: 'Impacto médio',
+                    effort: 'Esforço baixo'
+                },
+                {
+                    priority: 'low',
+                    title: 'Criar dashboards interativos',
+                    description: 'Desenvolver visualizações mais intuitivas e interativas para facilitar a interpretação dos resultados.',
+                    impact: 'Impacto baixo',
+                    effort: 'Esforço médio'
+                }
+            ];
+            
+            const recommendationsList = document.getElementById('recommendations-list');
+            recommendationsList.innerHTML = recommendations.map(rec => `
+                <div class="flex items-start space-x-4 p-4 bg-slate-800/30 rounded-lg">
+                    <div class="w-3 h-3 rounded-full mt-2 flex-shrink-0 ${
+                        rec.priority === 'high' ? 'bg-red-400' :
+                        rec.priority === 'medium' ? 'bg-yellow-400' : 'bg-green-400'
+                    }"></div>
+                    <div class="flex-1">
+                        <h5 class="font-semibold text-white mb-1">${rec.title}</h5>
+                        <p class="text-slate-300 text-sm mb-2">${rec.description}</p>
+                        <div class="flex items-center space-x-4 text-xs">
+                            <span class="text-slate-400">Impacto: ${rec.impact}</span>
+                            <span class="text-slate-400">Esforço: ${rec.effort}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function exportResults(format) {
+            if (window.insightAI) {
+                window.insightAI.showNotification(`Exportando resultados em ${format.toUpperCase()}...`, 'info');
+                
+                // Simulate export process
+                setTimeout(() => {
+                    window.insightAI.showNotification(`Resultados exportados com sucesso!`, 'success');
+                }, 2000);
+            }
+        }
+        
+        function exportAnalysis() {
+            exportResults('pdf');
+        }
+        
+        function showSettings() {
+            if (window.insightAI) {
+                window.insightAI.showNotification('Configurações em breve!', 'info');
+            }
+        }
+    </script>
+</body>
+</html>

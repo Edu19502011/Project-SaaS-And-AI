@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquivos - InsightAI</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="design.css">
+    
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        /* Custom scrollbar for sidebar */
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .sidebar-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 2px;
+        }
+        
+        /* File cards */
+        .file-card {
+            transition: all 0.3s ease;
+        }
+        
+        .file-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2);
+        }
+        
+        /* File type icons */
+        .file-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .file-icon.csv { background: linear-gradient(135deg, #10b981, #059669); }
+        .file-icon.json { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .file-icon.xlsx { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .file-icon.pdf { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .file-icon.txt { background: linear-gradient(135deg, #6b7280, #4b5563); }
+        .file-icon.png, .file-icon.jpg { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        
+        /* Upload area */
+        .upload-area {
+            border: 2px dashed rgba(99, 102, 241, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            border-color: rgba(99, 102, 241, 0.6);
+            background-color: rgba(99, 102, 241, 0.05);
+        }
+        
+        .upload-area.dragover {
+            border-color: #6366f1;
+            background-color: rgba(99, 102, 241, 0.1);
+        }
+        
+        /* Storage progress */
+        .storage-progress {
+            background: linear-gradient(90deg, #6366f1, #3b82f6);
+            height: 8px;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        /* Quick actions */
+        .quick-action {
+            transition: all 0.3s ease;
+        }
+        
+        .quick-action:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="grid-gradient-background text-white min-h-screen">
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
+    
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar-modern fixed inset-y-0 left-0 w-64 z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
+        <!-- Logo -->
+        <div class="flex items-center justify-center h-20 border-b border-slate-700">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-brain text-white text-lg"></i>
+                </div>
+                <span class="text-2xl font-bold gradient-text-primary">InsightAI</span>
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <nav class="mt-6 px-4 sidebar-scroll overflow-y-auto" style="height: calc(100vh - 140px);">
+            <div class="space-y-2">
+                <!-- Dashboard -->
+                <a href="dashboard.html" class="sidebar-hover flex items-center px-4 py-3 rounded-lg text-slate-300 hover:text-white transition-colors">
+                    <i class="fas fa-tachometer-alt mr-3 text-lg"></i>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+                
+                <!-- Reports -->
+                <a href="reports.html" class="sidebar-hover flex items-center px-4 py-3 rounded-lg text-slate-300 hover:text-white transition-colors">
+                    <i class="fas fa-chart-bar mr-3 text-lg"></i>
+                    <span class="font-medium">Relatórios</span>
+                </a>
+                
+                <!-- AI Text -->
+                <a href="ai-text.html" class="sidebar-hover flex items-center px-4 py-3 rounded-lg text-slate-300 hover:text-white transition-colors">
+                    <i class="fas fa-magic mr-3 text-lg"></i>
+                    <span class="font-medium">IA Texto</span>
+                </a>
+                
+                <!-- Data Analysis -->
+                <a href="data-analysis.html" class="sidebar-hover flex items-center px-4 py-3 rounded-lg text-slate-300 hover:text-white transition-colors">
+                    <i class="fas fa-brain mr-3 text-lg"></i>
+                    <span class="font-medium">Análise de Dados</span>
+                </a>
+                
+                <!-- Files -->
+                <a href="files.html" class="sidebar-hover flex items-center px-4 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+                    <i class="fas fa-folder mr-3 text-lg"></i>
+                    <span class="font-semibold">Arquivos</span>
+                </a>
+                
+                <!-- Settings -->
+                <a href="settings.html" class="sidebar-hover flex items-center px-4 py-3 rounded-lg text-slate-300 hover:text-white transition-colors">
+                    <i class="fas fa-cog mr-3 text-lg"></i>
+                    <span class="font-medium">Configurações</span>
+                </a>
+            </div>
+            
+            <!-- User Section -->
+            <div class="absolute bottom-4 left-4 right-4">
+                <div class="glass rounded-lg p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                            <span class="text-white font-semibold">JD</span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-white font-semibold text-sm">João Silva</div>
+                            <div class="text-slate-400 text-xs">Gerente de Projetos</div>
+                        </div>
+                        <button onclick="showSettings()" class="text-slate-400 hover:text-white">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="lg:ml-64 min-h-screen">
+        <!-- Header -->
+        <header class="nav-modern sticky top-0 z-20 border-b border-slate-700">
+            <div class="px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <!-- Mobile Menu Button -->
+                    <button id="mobile-menu-btn" class="lg:hidden text-white">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    
+                    <!-- Page Title -->
+                    <div class="flex-1 lg:flex-none">
+                        <h1 class="text-2xl font-bold gradient-text-primary">Arquivos</h1>
+                    </div>
+                    
+                    <!-- Header Actions -->
+                    <div class="flex items-center space-x-4">
+                        <!-- Upload Button -->
+                        <button onclick="document.getElementById('file-input').click()" class="hidden md:flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all">
+                            <i class="fas fa-upload"></i>
+                            <span>Upload</span>
+                        </button>
+                        
+                        <!-- Notifications -->
+                        <button class="relative p-2 text-slate-400 hover:text-white transition-colors">
+                            <i class="fas fa-bell text-lg"></i>
+                            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                        </button>
+                        
+                        <!-- User Menu -->
+                        <button class="flex items-center space-x-2 p-2 text-slate-400 hover:text-white transition-colors">
+                            <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                                <span class="text-white font-semibold text-sm">JD</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="p-4 sm:p-6 lg:p-8">
+            <!-- Welcome Section -->
+            <div class="mb-8 animate-fade-in">
+                <div class="glass rounded-2xl p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold mb-2">Gerenciador de Arquivos</h2>
+                            <p class="text-slate-300">Organize, compartilhe e acesse todos os seus dados e documentos em um só lugar.</p>
+                        </div>
+                        <div class="hidden md:flex items-center space-x-4">
+                            <div class="text-center">
+                                <div class="text-2xl font-bold gradient-text">2.4GB</div>
+                                <div class="text-slate-400 text-sm">Usados</div>
+                            </div>
+                            <div class="w-px h-12 bg-slate-600"></div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold gradient-text">156</div>
+                                <div class="text-slate-400 text-sm">Arquivos</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Storage Overview -->
+            <div class="glass rounded-2xl p-6 mb-8 animate-on-scroll">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold">Armazenamento</h3>
+                    <button onclick="upgradeStorage()" class="text-purple-400 hover:text-purple-300 text-sm font-medium">
+                        <i class="fas fa-upgrade mr-1"></i>
+                        Upgrade
+                    </button>
+                </div>
+                
+                <div class="grid md:grid-cols-4 gap-6">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold gradient-text mb-2">2.4GB</div>
+                        <div class="text-slate-400 text-sm mb-3">Usados</div>
+                        <div class="w-full bg-slate-700 rounded-full h-2">
+                            <div class="storage-progress" style="width: 48%"></div>
+                        </div>
+                        <div class="text-slate-400 text-xs mt-2">48% de 5GB</div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-blue-400 mb-2">89</div>
+                        <div class="text-slate-400 text-sm mb-3">Documentos</div>
+                        <div class="w-full bg-slate-700 rounded-full h-2">
+                            <div class="storage-progress" style="width: 57%"></div>
+                        </div>
+                        <div class="text-slate-400 text-xs mt-2">1.37GB</div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-green-400 mb-2">45</div>
+                        <div class="text-slate-400 text-sm mb-3">Imagens</div>
+                        <div class="w-full bg-slate-700 rounded-full h-2">
+                            <div class="storage-progress" style="width: 21%"></div>
+                        </div>
+                        <div class="text-slate-400 text-xs mt-2">0.52GB</div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-purple-400 mb-2">22</div>
+                        <div class="text-slate-400 text-sm mb-3">Outros</div>
+                        <div class="w-full bg-slate-700 rounded-full h-2">
+                            <div class="storage-progress" style="width: 10%"></div>
+                        </div>
+                        <div class="text-slate-400 text-xs mt-2">0.51GB</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Upload Area and Quick Actions -->
+            <div class="grid lg:grid-cols-3 gap-6 mb-8">
+                <!-- Upload Area -->
+                <div class="lg:col-span-2 glass rounded-2xl p-6 animate-on-scroll">
+                    <h3 class="text-xl font-bold mb-6">Upload de Arquivos</h3>
+                    
+                    <div id="upload-area" class="upload-area rounded-xl p-8 text-center mb-6">
+                        <div class="mb-4">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-purple-400"></i>
+                        </div>
+                        <h4 class="text-lg font-semibold mb-2">Arraste seus arquivos aqui</h4>
+                        <p class="text-slate-400 mb-4">Ou clique para selecionar arquivos</p>
+                        <button onclick="document.getElementById('file-input').click()" class="btn-primary px-6 py-3 rounded-lg font-semibold">
+                            <i class="fas fa-folder-open mr-2"></i>
+                            Selecionar Arquivos
+                        </button>
+                        <input type="file" id="file-input" multiple class="hidden">
+                        <p class="text-slate-500 text-sm mt-4">Máximo 100MB por arquivo</p>
+                    </div>
+                    
+                    <!-- Upload Progress -->
+                    <div id="upload-progress" class="hidden">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-white font-medium">Enviando arquivos...</span>
+                            <span class="text-slate-400 text-sm" id="upload-percentage">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-700 rounded-full h-2">
+                            <div id="upload-bar" class="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="glass rounded-2xl p-6 animate-on-scroll">
+                    <h3 class="text-xl font-bold mb-6">Ações Rápidas</h3>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="createFolder()" class="quick-action glass rounded-xl p-4 text-center hover:bg-slate-800/50 transition-colors">
+                            <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-folder-plus text-white text-lg"></i>
+                            </div>
+                            <div class="text-white font-medium text-sm">Nova Pasta</div>
+                        </button>
+                        
+                        <button onclick="scanDocuments()" class="quick-action glass rounded-xl p-4 text-center hover:bg-slate-800/50 transition-colors">
+                            <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-search text-white text-lg"></i>
+                            </div>
+                            <div class="text-white font-medium text-sm">Escanear</div>
+                        </button>
+                        
+                        <button onclick="syncCloud()" class="quick-action glass rounded-xl p-4 text-center hover:bg-slate-800/50 transition-colors">
+                            <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-sync text-white text-lg"></i>
+                            </div>
+                            <div class="text-white font-medium text-sm">Sincronizar</div>
+                        </button>
+                        
+                        <button onclick="backupFiles()" class="quick-action glass rounded-xl p-4 text-center hover:bg-slate-800/50 transition-colors">
+                            <div class="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-download text-white text-lg"></i>
+                            </div>
+                            <div class="text-white font-medium text-sm">Backup</div>
+                        </button>
+                    </div>
+                    
+                    <!-- Recent Activity -->
+                    <div class="mt-6 pt-6 border-t border-slate-700">
+                        <h4 class="font-semibold text-slate-300 mb-4">Atividade Recente</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-3 text-sm">
+                                <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+                                <span class="text-slate-400">sales_data.csv enviado</span>
+                                <span class="text-slate-500 text-xs">Há 5 min</span>
+                            </div>
+                            <div class="flex items-center space-x-3 text-sm">
+                                <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                                <span class="text-slate-400">Pasta "Projetos" criada</span>
+                                <span class="text-slate-500 text-xs">Há 1 hora</span>
+                            </div>
+                            <div class="flex items-center space-x-3 text-sm">
+                                <div class="w-2 h-2 bg-purple-400 rounded-full"></div>
+                                <span class="text-slate-400">Relatório.pdf sincronizado</span>
+                                <span class="text-slate-500 text-xs">Há 2 horas</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Files Grid -->
+            <div class="glass rounded-2xl p-6 animate-on-scroll">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold">Seus Arquivos</h3>
+                    
+                    <!-- View Options -->
+                    <div class="flex items-center space-x-2">
+                        <button onclick="setView('grid')" id="grid-view" class="p-2 text-purple-400 bg-purple-500/20 rounded-lg">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button onclick="setView('list')" id="list-view" class="p-2 text-slate-400 hover:text-white rounded-lg">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- File Grid -->
+                <div id="file-grid" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <!-- CSV File -->
+                    <div class="file-card glass rounded-xl p-4">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="file-icon csv">
+                                <i class="fas fa-file-csv text-white"></i>
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                <button onclick="shareFile(1)" class="text-slate-400 hover:text-blue-400 p-1">
+                                    <i class="fas fa-share text-xs"></i>
+                                </button>
+                                <button onclick="downloadFile(1)" class="text-slate-400 hover:text-green-400 p-1">
+                                    <i class="fas fa-download text-xs"></i>
+                                </button>
+                                <button onclick="deleteFile(1)" class="text-slate-400 hover:text-red-400 p-1">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-white mb-1 truncate">sales_data_q4.csv</h4>
+                        <p class="text-slate-400 text-sm mb-2">Dados de vendas do 4º trimestre</p>
+                        <div class="flex items-center justify-between text-xs text-slate-500">
+                            <span>2.4 MB</span>
+                            <span>Há 2 horas</span>
+                        </div>
+                    </div>
+                    
+                    <!-- JSON File -->
+                    <div class="file-card glass rounded-xl p-4">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="file-icon json">
+                                <i class="fab fa-js-square text-white"></i>
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                <button onclick="shareFile(2)" class="text-slate-400 hover:text-blue-400 p-1">
+                                    <i class="fas fa-share text-xs"></i>
+                                </button>
+                                <button onclick="downloadFile(2)" class="text-slate-400 hover:text-green-400 p-1">
+                                    <i class="fas fa-download text-xs"></i>
+                                </button>
+                                <button onclick="deleteFile(2)" class="text-slate-400 hover:text-red-400 p-1">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-white mb-1 truncate">api_response.json</h4>
+                        <p class="text-slate-400 text-sm mb-2">Resposta da API de análise</p>
+                        <div class="flex items-center justify-between text-xs text-slate-500">
+                            <span>156 KB</span>
+                            <span>Há 4 horas</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Excel File -->
+                    <div class="file-card glass rounded-xl p-4">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="file-icon xlsx">
+                                <i class="fas fa-file-excel text-white"></i>
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                <button onclick="shareFile(3)" class="text-slate-400 hover:text-blue-400 p-1">
+                                    <i class="fas fa-share text-xs"></i>
+                                </button>
+                                <button onclick="downloadFile(3)" class="text-slate-400 hover:text-green-400 p-1">
+                                    <i class="fas fa-download text-xs"></i>
+                                </button>
+                                <button onclick="deleteFile(3)" class="text-slate-400 hover:text-red-400 p-1">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-white mb-1 truncate">marketing_campaigns.xlsx</h4>
+                        <p class="text-slate-400 text-sm mb-2">Campanhas de marketing 2024</p>
+                        <div class="flex items-center justify-between text-xs text-slate-500">
+                            <span>5.2 MB</span>
+                            <span>Há 1 dia</span>
+                        </div>
+                    </div>
+                    
+                    <!-- PDF File -->
+                    <div class="file-card glass rounded-xl p-4">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="file-icon pdf">
+                                <i class="fas fa-file-pdf text-white"></i>
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                <button onclick="shareFile(4)" class="text-slate-400 hover:text-blue-400 p-1">
+                                    <i class="fas fa-share text-xs"></i>
+                                </button>
+                                <button onclick="downloadFile(4)" class="text-slate-400 hover:text-green-400 p-1">
+                                    <i class="fas fa-download text-xs"></i>
+                                </button>
+                                <button onclick="deleteFile(4)" class="text-slate-400 hover:text-red-400 p-1">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-white mb-1 truncate">quarterly_report.pdf</h4>
+                        <p class="text-slate-400 text-sm mb-2">Relatório trimestral completo</p>
+                        <div class="flex items-center justify-between text-xs text-slate-500">
+                            <span>3.8 MB</span>
+                            <span>Há 2 dias</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Image File -->
+                    <div class="file-card glass rounded-xl p-4">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="file-icon png">
+                                <i class="fas fa-image text-white"></i>
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                <button onclick="shareFile(5)" class="text-slate-400 hover:text-blue-400 p-1">
+                                    <i class="fas fa-share text-xs"></i>
+                                </button>
+                                <button onclick="downloadFile(5)" class="text-slate-400 hover:text-green-400 p-1">
+                                    <i class="fas fa-download text-xs"></i>
+                                </button>
+                                <button onclick="deleteFile(5)" class="text-slate-400 hover:text-red-400 p-1">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-white mb-1 truncate">dashboard_screenshot.png</h4>
+                        <p class="text-slate-400 text-sm mb-2">Captura do dashboard</p>
+                        <div class="flex items-center justify-between text-xs text-slate-500">
+                            <span>890 KB</span>
+                            <span>Há 3 dias</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Text File -->
+                    <div class="file-card glass rounded-xl p-4">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="file-icon txt">
+                                <i class="fas fa-file-alt text-white"></i>
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                <button onclick="shareFile(6)" class="text-slate-400 hover:text-blue-400 p-1">
+                                    <i class="fas fa-share text-xs"></i>
+                                </button>
+                                <button onclick="downloadFile(6)" class="text-slate-400 hover:text-green-400 p-1">
+                                    <i class="fas fa-download text-xs"></i>
+                                </button>
+                                <button onclick="deleteFile(6)" class="text-slate-400 hover:text-red-400 p-1">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-white mb-1 truncate">notes.txt</h4>
+                        <p class="text-slate-400 text-sm mb-2">Notas do projeto</p>
+                        <div class="flex items-center justify-between text-xs text-slate-500">
+                            <span>45 KB</span>
+                            <span>Há 5 dias</span>
+                        </div>
+                    </div>
+                    
+                    <!-- More files would be added here -->
+                    <div class="file-card glass rounded-xl p-4 border-2 border-dashed border-slate-600 flex items-center justify-center">
+                        <button onclick="document.getElementById('file-input').click()" class="text-center">
+                            <i class="fas fa-plus text-2xl text-slate-400 mb-2"></i>
+                            <p class="text-slate-400 text-sm">Adicionar arquivo</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="main.js"></script>
+    
+    <script>
+        // Files functionality
+        let currentView = 'grid';
+        let uploadedFiles = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeFiles();
+            setupMobileMenu();
+            setupFileUpload();
+        });
+        
+        function initializeFiles() {
+            console.log('Files page initialized');
+        }
+        
+        function setupMobileMenu() {
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            mobileMenuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
+            });
+            
+            overlay.addEventListener('click', () => {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            });
+        }
+        
+        function setupFileUpload() {
+            const uploadArea = document.getElementById('upload-area');
+            const fileInput = document.getElementById('file-input');
+            
+            // Drag and drop functionality
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                handleFileUpload(e.dataTransfer.files);
+            });
+            
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                handleFileUpload(e.target.files);
+            });
+        }
+        
+        async function handleFileUpload(files) {
+            const fileArray = Array.from(files);
+            const uploadProgress = document.getElementById('upload-progress');
+            const uploadBar = document.getElementById('upload-bar');
+            const uploadPercentage = document.getElementById('upload-percentage');
+            
+            if (fileArray.length === 0) return;
+            
+            // Show progress
+            uploadProgress.classList.remove('hidden');
+            
+            // Simulate upload progress
+            for (let i = 0; i <= 100; i += 10) {
+                uploadBar.style.width = i + '%';
+                uploadPercentage.textContent = i + '%';
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+            
+            // Add files to the list
+            fileArray.forEach(file => {
+                uploadedFiles.push({
+                    id: Date.now() + Math.random(),
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    lastModified: new Date(file.lastModified)
+                });
+            });
+            
+            // Hide progress and show success
+            setTimeout(() => {
+                uploadProgress.classList.add('hidden');
+                if (window.insightAI) {
+                    window.insightAI.showNotification(`${fileArray.length} arquivo(s) enviado(s) com sucesso!`, 'success');
+                }
+            }, 500);
+        }
+        
+        function setView(view) {
+            const gridView = document.getElementById('grid-view');
+            const listView = document.getElementById('list-view');
+            const fileGrid = document.getElementById('file-grid');
+            
+            currentView = view;
+            
+            if (view === 'grid') {
+                gridView.classList.add('text-purple-400', 'bg-purple-500/20');
+                gridView.classList.remove('text-slate-400');
+                listView.classList.remove('text-purple-400', 'bg-purple-500/20');
+                listView.classList.add('text-slate-400');
+                
+                fileGrid.className = 'grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4';
+            } else {
+                listView.classList.add('text-purple-400', 'bg-purple-500/20');
+                listView.classList.remove('text-slate-400');
+                gridView.classList.remove('text-purple-400', 'bg-purple-500/20');
+                gridView.classList.add('text-slate-400');
+                
+                fileGrid.className = 'space-y-2';
+            }
+        }
+        
+        function shareFile(id) {
+            if (window.insightAI) {
+                window.insightAI.showNotification('Link de compartilhamento copiado!', 'success');
+            }
+        }
+        
+        function downloadFile(id) {
+            if (window.insightAI) {
+                window.insightAI.showNotification('Download iniciado!', 'info');
+            }
+        }
+        
+        function deleteFile(id) {
+            if (confirm('Tem certeza que deseja excluir este arquivo?')) {
+                if (window.insightAI) {
+                    window.insightAI.showNotification('Arquivo excluído com sucesso!', 'success');
+                }
+                
+                // Remove file from UI (in a real app, this would also remove from server)
+                const fileCard = event.target.closest('.file-card');
+                if (fileCard) {
+                    anime({
+                        targets: fileCard,
+                        opacity: [1, 0],
+                        scale: [1, 0.8],
+                        duration: 300,
+                        easing: 'easeInQuad',
+                        complete: () => fileCard.remove()
+                    });
+                }
+            }
+        }
+        
+        function createFolder() {
+            const folderName = prompt('Nome da nova pasta:');
+            if (folderName) {
+                if (window.insightAI) {
+                    window.insightAI.showNotification(`Pasta "${folderName}" criada com sucesso!`, 'success');
+                }
+            }
+        }
+        
+        function scanDocuments() {
+            if (window.insightAI) {
+                window.insightAI.showNotification('Escaneamento de documentos em breve!', 'info');
+            }
+        }
+        
+        function syncCloud() {
+            if (window.insightAI) {
+                window.insightAI.showNotification('Sincronizando com a nuvem...', 'info');
+                
+                setTimeout(() => {
+                    window.insightAI.showNotification('Sincronização concluída!', 'success');
+                }, 2000);
+            }
+        }
+        
+        function backupFiles() {
+            if (window.insightAI) {
+                window.insightAI.showNotification('Preparando backup...', 'info');
+                
+                setTimeout(() => {
+                    window.insightAI.showNotification('Backup concluído com sucesso!', 'success');
+                }, 3000);
+            }
+        }
+        
+        function upgradeStorage() {
+            if (window.insightAI) {
+                window.insightAI.showNotification('Opções de upgrade em breve!', 'info');
+            }
+        }
+        
+        function showSettings() {
+            if (window.insightAI) {
+                window.insightAI.showNotification('Configurações em breve!', 'info');
+            }
+        }
+    </script>
+</body>
+</html>

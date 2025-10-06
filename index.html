@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InsightAI - Plataforma de Inteligência Artificial para Análise de Dados</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="design.css">
+    
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        /* Hero Background Animation */
+        .hero-bg {
+            position: relative;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(59, 130, 246, 0.1) 50%, rgba(15, 23, 42, 0.9) 100%);
+        }
+        
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.2) 0%, transparent 50%);
+            animation: rotateGradient 20s linear infinite;
+        }
+        
+        @keyframes rotateGradient {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Floating Elements */
+        .floating-element {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .floating-element:nth-child(odd) {
+            animation-delay: -3s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        
+        /* Glass Morphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #6366f1, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        /* Interactive Elements */
+        .interactive-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .interactive-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(99, 102, 241, 0.3);
+        }
+        
+        /* Button Effects */
+        .btn-glow {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-glow::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-glow:hover::before {
+            left: 100%;
+        }
+        
+        /* Particle Animation */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(99, 102, 241, 0.6);
+            border-radius: 50%;
+            animation: particleFloat 8s infinite linear;
+        }
+        
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100vh) translateX(0px);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px);
+                opacity: 0;
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body class="grid-gradient-background text-white min-h-screen">
+    <!-- Navigation -->
+    <nav class="nav-modern fixed top-0 w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-brain text-white text-lg"></i>
+                    </div>
+                    <span class="text-2xl font-bold gradient-text">InsightAI</span>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-slate-300 hover:text-white transition-colors font-medium">Funcionalidades</a>
+                    <a href="#solutions" class="text-slate-300 hover:text-white transition-colors font-medium">Soluções</a>
+                    <a href="#pricing" class="text-slate-300 hover:text-white transition-colors font-medium">Planos</a>
+                    <a href="#about" class="text-slate-300 hover:text-white transition-colors font-medium">Sobre</a>
+                    <button onclick="showLogin()" class="btn-primary px-6 py-2 rounded-lg font-semibold transition-all hover:scale-105">
+                        Entrar
+                    </button>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden text-white">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-slate-900/95 backdrop-blur-sm border-t border-slate-700">
+            <div class="px-4 py-4 space-y-3">
+                <a href="#features" class="block text-slate-300 hover:text-white transition-colors">Funcionalidades</a>
+                <a href="#solutions" class="block text-slate-300 hover:text-white transition-colors">Soluções</a>
+                <a href="#pricing" class="block text-slate-300 hover:text-white transition-colors">Planos</a>
+                <a href="#about" class="block text-slate-300 hover:text-white transition-colors">Sobre</a>
+                <button onclick="showLogin()" class="w-full btn-primary py-2 rounded-lg font-semibold mt-4">
+                    Entrar
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg min-h-screen flex items-center relative overflow-hidden pt-16">
+        <!-- Floating Elements -->
+        <div class="particles">
+            <div class="floating-element top-20 left-10 w-20 h-20 bg-purple-500/10 rounded-full"></div>
+            <div class="floating-element top-40 right-20 w-16 h-16 bg-blue-500/10 rounded-full"></div>
+            <div class="floating-element bottom-40 left-20 w-24 h-24 bg-indigo-500/10 rounded-full"></div>
+            <div class="floating-element bottom-20 right-10 w-18 h-18 bg-violet-500/10 rounded-full"></div>
+        </div>
+        
+        <!-- Particles Animation -->
+        <div class="particles">
+            <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+            <div class="particle" style="left: 20%; animation-delay: 1s;"></div>
+            <div class="particle" style="left: 30%; animation-delay: 2s;"></div>
+            <div class="particle" style="left: 40%; animation-delay: 3s;"></div>
+            <div class="particle" style="left: 50%; animation-delay: 4s;"></div>
+            <div class="particle" style="left: 60%; animation-delay: 5s;"></div>
+            <div class="particle" style="left: 70%; animation-delay: 6s;"></div>
+            <div class="particle" style="left: 80%; animation-delay: 7s;"></div>
+            <div class="particle" style="left: 90%; animation-delay: 8s;"></div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <!-- Hero Content -->
+                <div class="space-y-8 animate-fade-in-left">
+                    <div class="space-y-6">
+                        <div class="inline-flex items-center space-x-2 bg-purple-500/10 border border-purple-500/20 rounded-full px-4 py-2">
+                            <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                            <span class="text-purple-300 text-sm font-medium">IA Avançada Disponível</span>
+                        </div>
+                        
+                        <h1 class="hero-title text-5xl lg:text-7xl font-black leading-tight">
+                            Transforme seus dados em
+                            <span class="gradient-text block" id="typed-text"></span>
+                        </h1>
+                        
+                        <p class="hero-subtitle text-xl text-slate-300 leading-relaxed max-w-2xl">
+                            Plataforma completa de IA para análise de dados, geração de relatórios e insights inteligentes. 
+                            Tudo que sua empresa precisa para tomar decisões baseadas em dados com precisão e velocidade.
+                        </p>
+                    </div>
+                    
+                    <!-- CTA Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button onclick="showRegister()" class="btn-primary btn-glow px-8 py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105">
+                            <i class="fas fa-rocket mr-2"></i>
+                            Começar Gratuitamente
+                        </button>
+                        <button onclick="scrollToDemo()" class="btn-secondary px-8 py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105">
+                            <i class="fas fa-play mr-2"></i>
+                            Ver Demonstração
+                        </button>
+                    </div>
+                    
+                    <!-- Stats -->
+                    <div class="flex flex-wrap gap-8 pt-8">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold gradient-text counter" data-target="15000">0</div>
+                            <div class="text-slate-400 text-sm">Usuários Ativos</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold gradient-text counter" data-target="500">0</div>
+                            <div class="text-slate-400 text-sm">Empresas</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold gradient-text counter" data-target="99">0</div>
+                            <div class="text-slate-400 text-sm">% Precisão</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Hero Visual -->
+                <div class="relative animate-fade-in-right">
+                    <div class="glass rounded-3xl p-8 transform rotate-3 hover:rotate-0 transition-transform duration-500">
+                        <!-- Mock Dashboard -->
+                        <div class="space-y-6">
+                            <!-- Header -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-3 h-3 bg-red-400 rounded-full"></div>
+                                    <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                                    <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+                                </div>
+                                <div class="text-slate-400 text-sm">InsightAI Dashboard</div>
+                            </div>
+                            
+                            <!-- Chart -->
+                            <div class="bg-slate-800/50 rounded-xl p-4">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="text-slate-300 font-semibold">Análise de Dados</div>
+                                    <div class="flex space-x-1">
+                                        <div class="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                        <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                    </div>
+                                </div>
+                                <div class="h-32 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-lg flex items-end p-2">
+                                    <div class="flex space-x-1 w-full">
+                                        <div class="flex-1 bg-purple-500 rounded-t h-16"></div>
+                                        <div class="flex-1 bg-blue-500 rounded-t h-24"></div>
+                                        <div class="flex-1 bg-green-500 rounded-t h-20"></div>
+                                        <div class="flex-1 bg-purple-500 rounded-t h-28"></div>
+                                        <div class="flex-1 bg-blue-500 rounded-t h-16"></div>
+                                        <div class="flex-1 bg-green-500 rounded-t h-24"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Stats Grid -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-slate-800/50 rounded-xl p-4 text-center">
+                                    <div class="text-2xl font-bold text-purple-400">+85%</div>
+                                    <div class="text-slate-400 text-sm">Precisão</div>
+                                </div>
+                                <div class="bg-slate-800/50 rounded-xl p-4 text-center">
+                                    <div class="text-2xl font-bold text-blue-400">2.3s</div>
+                                    <div class="text-slate-400 text-sm">Resposta</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Floating Cards -->
+                    <div class="absolute -top-4 -right-4 glass rounded-xl p-4 animate-float">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                <i class="fas fa-check text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="text-white font-semibold text-sm">IA Processando</div>
+                                <div class="text-slate-400 text-xs">Análise completa</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="absolute -bottom-4 -left-4 glass rounded-xl p-4 animate-float" style="animation-delay: -2s;">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                                <i class="fas fa-brain text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="text-white font-semibold text-sm">Machine Learning</div>
+                                <div class="text-slate-400 text-xs">Modelo ativo</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Section Header -->
+            <div class="text-center mb-16 animate-on-scroll">
+                <div class="inline-flex items-center space-x-2 bg-blue-500/10 border border-blue-500/20 rounded-full px-4 py-2 mb-6">
+                    <i class="fas fa-star text-blue-400"></i>
+                    <span class="text-blue-300 text-sm font-medium">Funcionalidades Exclusivas</span>
+                </div>
+                
+                <h2 class="text-4xl lg:text-5xl font-black mb-6">
+                    Tudo que você precisa para
+                    <span class="gradient-text">análise de dados</span>
+                </h2>
+                
+                <p class="text-xl text-slate-300 max-w-3xl mx-auto">
+                    Ferramentas poderosas de IA que transformam dados brutos em insights acionáveis, 
+                    economizando tempo e melhorando a precisão das suas decisões.
+                </p>
+            </div>
+            
+            <!-- Features Grid -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="interactive-card glass rounded-2xl p-8 animate-on-scroll">
+                    <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-chart-line text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Análise Avançada</h3>
+                    <p class="text-slate-300 mb-6">
+                        Algoritmos de machine learning avançados que identificam padrões ocultos 
+                        e tendências em seus dados com precisão cirúrgica.
+                    </p>
+                    <div class="flex items-center text-purple-400 font-semibold">
+                        <span>Saiba mais</span>
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </div>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="interactive-card glass rounded-2xl p-8 animate-on-scroll">
+                    <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-green-500 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-brain text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">IA Generativa</h3>
+                    <p class="text-slate-300 mb-6">
+                        Gere relatórios, análises e insights usando os modelos mais avançados 
+                        de inteligência artificial disponíveis no mercado.
+                    </p>
+                    <div class="flex items-center text-blue-400 font-semibold">
+                        <span>Explorar IA</span>
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </div>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="interactive-card glass rounded-2xl p-8 animate-on-scroll">
+                    <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-purple-500 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-database text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Processamento em Tempo Real</h3>
+                    <p class="text-slate-300 mb-6">
+                        Processe milhares de dados em segundos com nossa infraestrutura 
+                        otimizada para performance e escalabilidade.
+                    </p>
+                    <div class="flex items-center text-green-400 font-semibold">
+                        <span>Ver performance</span>
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </div>
+                </div>
+                
+                <!-- Feature 4 -->
+                <div class="interactive-card glass rounded-2xl p-8 animate-on-scroll">
+                    <div class="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-shield-alt text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Segança Enterprise</h3>
+                    <p class="text-slate-300 mb-6">
+                        Segurança de nível empresarial com criptografia end-to-end 
+                        e conformidade com LGPD e GDPR.
+                    </p>
+                    <div class="flex items-center text-indigo-400 font-semibold">
+                        <span>Confiança</span>
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </div>
+                </div>
+                
+                <!-- Feature 5 -->
+                <div class="interactive-card glass rounded-2xl p-8 animate-on-scroll">
+                    <div class="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-users text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Colaboração em Equipe</h3>
+                    <p class="text-slate-300 mb-6">
+                        Compartilhe insights e trabalhe colaborativamente com sua equipe 
+                        em tempo real com nossas ferramentas avançadas.
+                    </p>
+                    <div class="flex items-center text-pink-400 font-semibold">
+                        <span>Colaborar</span>
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </div>
+                </div>
+                
+                <!-- Feature 6 -->
+                <div class="interactive-card glass rounded-2xl p-8 animate-on-scroll">
+                    <div class="w-16 h-16 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-mobile-alt text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Acesso Universal</h3>
+                    <p class="text-slate-300 mb-6">
+                        Acesse seus dados e insights de qualquer dispositivo, 
+                        onde estiver, com nossa plataforma responsiva.
+                    </p>
+                    <div class="flex items-center text-yellow-400 font-semibold">
+                        <span>Acessar</span>
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Demo Section -->
+    <section id="demo" class="py-20 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 animate-on-scroll">
+                <h2 class="text-4xl lg:text-5xl font-black mb-6">
+                    Veja a <span class="gradient-text">IA em ação</span>
+                </h2>
+                <p class="text-xl text-slate-300 max-w-3xl mx-auto">
+                    Experimente nossa ferramenta de IA generativa e veja como ela pode 
+                    transformar suas ideias em conteúdo profissional em segundos.
+                </p>
+            </div>
+            
+            <!-- Interactive Demo -->
+            <div class="glass rounded-3xl p-8 max-w-4xl mx-auto animate-on-scroll">
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <!-- Input Section -->
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-300 mb-3">
+                                O que você gostaria de analisar?
+                            </label>
+                            <textarea 
+                                id="demo-prompt" 
+                                placeholder="Descreva os dados que você gostaria de analisar ou pergunte algo específico..."
+                                class="w-full h-32 bg-slate-800/50 border border-slate-600 rounded-xl p-4 text-white placeholder-slate-400 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 resize-none"
+                            ></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-300 mb-3">
+                                Tipo de Análise
+                            </label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button class="demo-style-btn p-3 bg-slate-800/50 border border-slate-600 rounded-lg text-sm hover:border-purple-500 transition-colors" data-style="predictive">
+                                    <i class="fas fa-chart-line mr-2"></i>
+                                    Preditiva
+                                </button>
+                                <button class="demo-style-btn p-3 bg-slate-800/50 border border-slate-600 rounded-lg text-sm hover:border-purple-500 transition-colors" data-style="descriptive">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    Descritiva
+                                </button>
+                                <button class="demo-style-btn p-3 bg-slate-800/50 border border-slate-600 rounded-lg text-sm hover:border-purple-500 transition-colors" data-style="diagnostic">
+                                    <i class="fas fa-search mr-2"></i>
+                                    Diagnóstica
+                                </button>
+                                <button class="demo-style-btn p-3 bg-slate-800/50 border border-slate-600 rounded-lg text-sm hover:border-purple-500 transition-colors" data-style="prescriptive">
+                                    <i class="fas fa-lightbulb mr-2"></i>
+                                    Prescritiva
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <button 
+                            onclick="runDemoAnalysis()" 
+                            class="w-full btn-primary py-4 rounded-xl font-bold text-lg btn-glow"
+                        >
+                            <i class="fas fa-magic mr-2"></i>
+                            Analisar com IA
+                        </button>
+                    </div>
+                    
+                    <!-- Output Section -->
+                    <div class="space-y-6">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-slate-300">Resultado da Análise</h3>
+                            <div id="demo-status" class="text-slate-400 text-sm">Aguardando entrada...</div>
+                        </div>
+                        
+                        <div id="demo-output" class="bg-slate-800/50 border border-slate-600 rounded-xl p-6 h-64 overflow-y-auto">
+                            <div class="text-slate-400 text-center py-8">
+                                <i class="fas fa-brain text-4xl mb-4 text-purple-400"></i>
+                                <p>Insira seus dados e clique em "Analisar com IA" para ver os resultados</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <div class="flex space-x-2">
+                                <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                <span class="text-green-400 text-sm">IA Online</span>
+                            </div>
+                            <button 
+                                onclick="copyDemoResult()" 
+                                class="text-blue-400 hover:text-blue-300 text-sm flex items-center"
+                                id="copy-btn"
+                                style="display: none;"
+                            >
+                                <i class="fas fa-copy mr-1"></i>
+                                Copiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-blue-600/10"></div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <div class="space-y-8">
+                <h2 class="text-4xl lg:text-5xl font-black">
+                    Pronto para transformar seus
+                    <span class="gradient-text">dados em insights?</span>
+                </h2>
+                
+                <p class="text-xl text-slate-300 max-w-2xl mx-auto">
+                    Junte-se a milhares de empresas que já estão usando nossa IA 
+                    para tomar decisões mais inteligentes e acelerar o crescimento.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="showRegister()" class="btn-primary px-8 py-4 rounded-xl font-bold text-lg btn-glow">
+                        <i class="fas fa-rocket mr-2"></i>
+                        Começar Agora
+                    </button>
+                    <button onclick="scrollToDemo()" class="btn-secondary px-8 py-4 rounded-xl font-bold text-lg">
+                        <i class="fas fa-calendar mr-2"></i>
+                        Agendar Demo
+                    </button>
+                </div>
+                
+                <div class="flex items-center justify-center space-x-8 pt-8">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold gradient-text">Grátis</div>
+                        <div class="text-slate-400 text-sm">Teste por 14 dias</div>
+                    </div>
+                    <div class="w-px h-8 bg-slate-600"></div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold gradient-text">R$0</div>
+                        <div class="text-slate-400 text-sm">Sem cartão</div>
+                    </div>
+                    <div class="w-px h-8 bg-slate-600"></div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold gradient-text">24/7</div>
+                        <div class="text-slate-400 text-sm">Suporte</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <div class="flex items-center justify-center space-x-3 mb-6">
+                    <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-brain text-white text-lg"></i>
+                    </div>
+                    <span class="text-2xl font-bold gradient-text">InsightAI</span>
+                </div>
+                
+                <p class="text-slate-400 mb-6 max-w-2xl mx-auto">
+                    Transformando o futuro da análise de dados com inteligência artificial avançada. 
+                    Potencializando negócios através de insights inteligentes.
+                </p>
+                
+                <div class="flex justify-center space-x-6 mb-8">
+                    <a href="#" class="text-slate-400 hover:text-white transition-colors">
+                        <i class="fab fa-twitter text-xl"></i>
+                    </a>
+                    <a href="#" class="text-slate-400 hover:text-white transition-colors">
+                        <i class="fab fa-linkedin text-xl"></i>
+                    </a>
+                    <a href="#" class="text-slate-400 hover:text-white transition-colors">
+                        <i class="fab fa-github text-xl"></i>
+                    </a>
+                </div>
+                
+                <div class="border-t border-slate-800 pt-6">
+                    <p class="text-slate-500 text-sm">
+                        © 2024 InsightAI. Todos os direitos reservados.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="main.js"></script>
+    
+    <script>
+        // Demo functionality
+        let selectedStyle = 'predictive';
+        
+        // Style selection
+        document.querySelectorAll('.demo-style-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.demo-style-btn').forEach(b => {
+                    b.classList.remove('border-purple-500', 'bg-purple-500/10');
+                    b.classList.add('border-slate-600');
+                });
+                
+                btn.classList.remove('border-slate-600');
+                btn.classList.add('border-purple-500', 'bg-purple-500/10');
+                selectedStyle = btn.dataset.style;
+            });
+        });
+        
+        // Set default selection
+        document.querySelector('[data-style="predictive"]').classList.add('border-purple-500', 'bg-purple-500/10');
+        
+        async function runDemoAnalysis() {
+            const prompt = document.getElementById('demo-prompt').value.trim();
+            const output = document.getElementById('demo-output');
+            const status = document.getElementById('demo-status');
+            const copyBtn = document.getElementById('copy-btn');
+            
+            if (!prompt) {
+                showNotification('Por favor, insira um prompt para análise!', 'warning');
+                return;
+            }
+            
+            // Show loading state
+            status.textContent = 'Analisando com IA...';
+            status.className = 'text-purple-400 text-sm';
+            
+            output.innerHTML = `
+                <div class="flex items-center justify-center h-full">
+                    <div class="text-center">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+                        <p class="text-purple-400">Processando sua análise...</p>
+                    </div>
+                </div>
+            `;
+            
+            // Simulate AI processing
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Generate mock analysis based on style
+            const analyses = {
+                predictive: `
+                    <div class="space-y-4">
+                        <h4 class="text-lg font-semibold text-purple-400">Análise Preditiva</h4>
+                        <p class="text-slate-300">Com base nos padrões identificados em "${prompt}", nossa IA projeta:</p>
+                        <ul class="space-y-2 text-slate-400">
+                            <li class="flex items-start">
+                                <i class="fas fa-arrow-trend-up text-green-400 mt-1 mr-2"></i>
+                                <span>Tendência de crescimento de 23% nos próximos 3 meses</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-exclamation-triangle text-yellow-400 mt-1 mr-2"></i>
+                                <span>Potencial risco identificado em 15% dos casos</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-lightbulb text-blue-400 mt-1 mr-2"></i>
+                                <span>Oportunidade de otimização em 67% dos processos</span>
+                            </li>
+                        </ul>
+                        <div class="bg-slate-700/50 rounded-lg p-4 mt-4">
+                            <div class="text-sm text-slate-400 mb-2">Confiança da previsão</div>
+                            <div class="w-full bg-slate-600 rounded-full h-2">
+                                <div class="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full" style="width: 87%"></div>
+                            </div>
+                            <div class="text-right text-sm text-slate-400 mt-1">87%</div>
+                        </div>
+                    </div>
+                `,
+                descriptive: `
+                    <div class="space-y-4">
+                        <h4 class="text-lg font-semibold text-blue-400">Análise Descritiva</h4>
+                        <p class="text-slate-300">Análise detalhada de "${prompt}":</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-slate-700/50 rounded-lg p-3">
+                                <div class="text-2xl font-bold text-blue-400">1,247</div>
+                                <div class="text-sm text-slate-400">Total de registros</div>
+                            </div>
+                            <div class="bg-slate-700/50 rounded-lg p-3">
+                                <div class="text-2xl font-bold text-green-400">89.3%</div>
+                                <div class="text-sm text-slate-400">Taxa de precisão</div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-700/50 rounded-lg p-4">
+                            <h5 class="font-semibold text-slate-300 mb-2">Principais insights:</h5>
+                            <ul class="space-y-1 text-slate-400 text-sm">
+                                <li>• Distribuição normal identificada</li>
+                                <li>• Correlação forte entre variáveis</li>
+                                <li>• Outliers detectados e analisados</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                diagnostic: `
+                    <div class="space-y-4">
+                        <h4 class="text-lg font-semibold text-yellow-400">Análise Diagnóstica</h4>
+                        <p class="text-slate-300">Diagnóstico detalhado de "${prompt}":</p>
+                        <div class="space-y-3">
+                            <div class="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-exclamation-circle text-red-400 mr-2"></i>
+                                    <span class="font-semibold text-red-400">Problema Identificado</span>
+                                </div>
+                                <p class="text-slate-300 text-sm">Inconsistência detectada no padrão de dados</p>
+                            </div>
+                            <div class="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                                    <span class="font-semibold text-green-400">Causa Raiz</span>
+                                </div>
+                                <p class="text-slate-300 text-sm">Variação sazonal fora do padrão esperado</p>
+                            </div>
+                            <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-lightbulb text-blue-400 mr-2"></i>
+                                    <span class="font-semibold text-blue-400">Recomendação</span>
+                                </div>
+                                <p class="text-slate-300 text-sm">Ajustar modelo para considerar sazonalidade</p>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                prescriptive: `
+                    <div class="space-y-4">
+                        <h4 class="text-lg font-semibold text-green-400">Análise Prescritiva</h4>
+                        <p class="text-slate-300">Recomendações para "${prompt}":</p>
+                        <div class="space-y-3">
+                            <div class="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-semibold text-green-400">Ação Recomendada #1</span>
+                                    <span class="text-green-400 text-sm">Impacto Alto</span>
+                                </div>
+                                <p class="text-slate-300 text-sm mb-2">Implementar modelo de previsão avançado</p>
+                                <div class="text-xs text-slate-400">Expectativa: 34% de melhoria na precisão</div>
+                            </div>
+                            <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-semibold text-blue-400">Ação Recomendada #2</span>
+                                    <span class="text-blue-400 text-sm">Impacto Médio</span>
+                                </div>
+                                <p class="text-slate-300 text-sm mb-2">Otimizar processamento de dados</p>
+                                <div class="text-xs text-slate-400">Expectativa: Redução de 45% no tempo</div>
+                            </div>
+                            <div class="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-semibold text-purple-400">Ação Recomendada #3</span>
+                                    <span class="text-purple-400 text-sm">Impacto Baixo</span>
+                                </div>
+                                <p class="text-slate-300 text-sm mb-2">Atualizar interface do usuário</p>
+                                <div class="text-xs text-slate-400">Expectativa: Melhoria na experiência</div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            };
+            
+            const result = analyses[selectedStyle] || analyses.predictive;
+            output.innerHTML = result;
+            copyBtn.style.display = 'flex';
+            
+            status.textContent = 'Análise completa!';
+            status.className = 'text-green-400 text-sm';
+            
+            // Animate the result
+            anime({
+                targets: '#demo-output > div',
+                opacity: [0, 1],
+                translateY: [20, 0],
+                duration: 600,
+                easing: 'easeOutQuad'
+            });
+        }
+        
+        function copyDemoResult() {
+            const output = document.getElementById('demo-output');
+            const text = output.textContent;
+            
+            if (navigator.clipboard && text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showNotification('Resultado copiado para a área de transferência!', 'success');
+                });
+            }
+        }
+        
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg text-white z-50 ${
+                type === 'success' ? 'bg-green-600' :
+                type === 'error' ? 'bg-red-600' :
+                type === 'warning' ? 'bg-yellow-600' :
+                'bg-blue-600'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            anime({
+                targets: notification,
+                translateX: [300, 0],
+                opacity: [0, 1],
+                duration: 300,
+                easing: 'easeOutQuad'
+            });
+
+            setTimeout(() => {
+                anime({
+                    targets: notification,
+                    translateX: [0, 300],
+                    opacity: [1, 0],
+                    duration: 300,
+                    easing: 'easeInQuad',
+                    complete: () => notification.remove()
+                });
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
